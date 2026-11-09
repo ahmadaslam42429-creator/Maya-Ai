@@ -516,7 +516,7 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
               </span>
             </div>
             <p className="text-slate-300 leading-relaxed">
-              AYRA AI is pre-configured with a complete GitHub Actions workflow (<code className="text-cyan-300">.github/workflows/android-release.yml</code>). Manual dispatch and version tags (<code className="text-cyan-300">v*</code>) compile the release APK and attach <code className="text-cyan-300">AYRA-AI.apk</code> directly to GitHub Releases.
+              AYRA AI is pre-configured with a complete automated GitHub Actions workflow (<code className="text-cyan-300">.github/workflows/android-release.yml</code>). Every push to <code className="text-cyan-300">main</code> automatically compiles a fresh, signed release APK (<code className="text-cyan-300">AYRA-AI.apk</code>), auto-increments the semantic version (<code className="text-cyan-300">v1.0.X</code>), and publishes the release directly to GitHub Releases.
             </p>
           </div>
 

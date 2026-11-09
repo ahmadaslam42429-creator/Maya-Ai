@@ -20,10 +20,12 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             debuggable true
+            signingConfig signingConfigs.debug
         }
     }
 
@@ -38,7 +40,9 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
-            if (variant.buildType.name == "debug") {
+            if (variant.buildType.name == "release") {
+                outputFileName = "AYRA-AI.apk"
+            } else if (variant.buildType.name == "debug") {
                 outputFileName = "AYRA-AI-debug.apk"
             } else {
                 outputFileName = "AYRA-AI-${variant.name}.apk"

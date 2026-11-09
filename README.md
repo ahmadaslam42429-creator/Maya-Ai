@@ -102,20 +102,16 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📦 Building the Android APK (`AYRA-AI.apk`)
 
-### Option A: Automated GitHub Actions (Recommended)
-1. Push your repository to GitHub:
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: release AYRA AI Android assistant"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/AYRA-AI.git
-   git push -u origin main
-   ```
-2. Trigger the Release:
-   - **Tag Push**: `git tag v1.0.0 && git push origin v1.0.0`
-   - **Manual Run**: In GitHub, navigate to **Actions** > **AYRA AI Android Build & Release** > **Run workflow**.
-3. Download `AYRA-AI.apk` directly from the **Releases** tab or **Workflow Artifacts**.
+### Option A: Automated GitHub Actions (Automatic on Push to `main`)
+1. Push changes to your `main` branch.
+2. The GitHub Actions workflow (`.github/workflows/android-release.yml`) automatically:
+   - Compiles fresh web assets into the Android assets directory.
+   - Builds a clean, signed release APK (`AYRA-AI.apk`) from the latest commit.
+   - Dynamically increments the version tag (`v1.0.0` → `v1.0.1` → `v1.0.2`...).
+   - Automatically creates and publishes a new GitHub Release with `AYRA-AI.apk` attached directly.
+   - Marks the newest release as the **Latest** release on GitHub.
+   - Also uploads `AYRA-AI-apk` as a 30-day workflow artifact.
+3. Download `AYRA-AI.apk` directly from your GitHub **Releases** page!
 
 ### Option B: Local Android Build via Gradle
 ```bash
