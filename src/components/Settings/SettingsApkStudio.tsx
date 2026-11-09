@@ -402,7 +402,8 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      - run: npm install
+          cache-dependency-path: 'package-lock.json'
+      - run: npm ci
       - run: |
           npm run build
           mkdir -p app/src/main/assets/public
@@ -451,8 +452,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'npm' }
-      - run: npm install && npm run build
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+      - run: npm ci && npm run build
       - uses: actions/setup-java@v4
         with: { distribution: 'temurin', java-version: '17', cache: 'gradle' }
       - run: chmod +x gradlew && ./gradlew assembleDebug

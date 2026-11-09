@@ -38,10 +38,11 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
 
       - name: Install Frontend Dependencies
         run: |
-          npm install
+          npm ci
 
       - name: Compile MAYA AI Web Assets
         run: |
