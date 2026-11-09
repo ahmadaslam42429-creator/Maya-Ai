@@ -364,7 +364,7 @@ git push -u origin main`}
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-cyan-500/20">
               <div className="flex items-center gap-1.5 text-xs font-hud text-cyan-300 uppercase">
                 <FileCode className="w-4 h-4 text-cyan-400" />
-                <span>.github/workflows/android-build.yml</span>
+                <span>.github/workflows/android-release.yml</span>
               </div>
               <button
                 onClick={() => copyToClipboard(`name: MAYA AI Android Build & Release
@@ -378,56 +378,91 @@ on:
       - 'v*'
   workflow_dispatch:
     inputs:
-      create_release:
-        description: 'Publish GitHub Release for this build'
+      custom_tag:
+        description: 'Custom version tag (optional, e.g. v1.0.5)'
         required: false
-        type: boolean
-        default: false
-      release_tag:
-        description: 'Release tag name (e.g., v1.0.0)'
-        required: false
-        default: 'v1.0.0'
+        default: ''
 
 permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build Android Debug APK
+  release:
+    name: Build & Publish Android Release APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
+
       - run: npm ci
+
       - run: |
           npm run build
           mkdir -p app/src/main/assets/public
           cp -r dist/* app/src/main/assets/public/
           cp -r dist/* app/src/main/assets/
+
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
+
       - run: chmod +x gradlew
+
       - run: ./gradlew assembleDebug --stacktrace --no-daemon
-      - name: Verify APK
+
+      - name: Verify & Package APK
         run: |
           mkdir -p build-artifacts
-          cp app/build/outputs/apk/debug/MAYA-AI-debug.apk build-artifacts/
+          OUTPUT_DIR="app/build/outputs/apk/debug"
+          if [ -f "$OUTPUT_DIR/MAYA-AI-debug.apk" ]; then
+            TARGET_APK="$OUTPUT_DIR/MAYA-AI-debug.apk"
+          else
+            TARGET_APK=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
+          fi
+          cp "$TARGET_APK" build-artifacts/MAYA-AI.apk
+          cp "$TARGET_APK" build-artifacts/MAYA-AI-debug.apk
+
       - uses: actions/upload-artifact@v4
         with:
-          name: MAYA-AI-debug-apk
-          path: build-artifacts/MAYA-AI-debug.apk
-      - if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == true
-        uses: softprops/action-gh-release@v2
+          name: MAYA-AI-apk
+          path: |
+            build-artifacts/MAYA-AI.apk
+            build-artifacts/MAYA-AI-debug.apk
+
+      - name: Compute Release Tag
+        id: release_meta
+        run: |
+          if [[ "\${{ github.ref }}" == refs/tags/v* ]]; then
+            TAG="\${GITHUB_REF#refs/tags/}"
+          elif [ -n "\${{ github.event.inputs.custom_tag }}" ]; then
+            TAG="\${{ github.event.inputs.custom_tag }}"
+          else
+            TAG="v1.0.\${{ github.run_number }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - uses: softprops/action-gh-release@v2
         with:
-          files: build-artifacts/MAYA-AI-debug.apk
-          name: "MAYA AI"
+          files: |
+            build-artifacts/MAYA-AI.apk
+            build-artifacts/MAYA-AI-debug.apk
+          name: "MAYA AI Android Release \${{ steps.release_meta.outputs.tag }}"
+          tag_name: \${{ steps.release_meta.outputs.tag }}
+          target_commitish: \${{ github.sha }}
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}`, 'workflow_yml')}
                 className="flex items-center gap-1 px-3 py-1 rounded-lg bg-cyan-950 text-cyan-300 text-xs border border-cyan-500/30 font-tech"
@@ -446,27 +481,23 @@ on:
 permissions:
   contents: write
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+        with: { node-version: 20, cache: 'npm', cache-dependency-path: 'package-lock.json' }
       - run: npm ci && npm run build
       - uses: actions/setup-java@v4
         with: { distribution: 'temurin', java-version: '17', cache: 'gradle' }
       - run: chmod +x gradlew && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
-        with:
-          name: MAYA-AI-debug-apk
-          path: app/build/outputs/apk/debug/MAYA-AI-debug.apk
+        with: { name: MAYA-AI-apk, path: build-artifacts/ }
       - uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/v')
         with:
-          files: app/build/outputs/apk/debug/MAYA-AI-debug.apk`}
+          files: build-artifacts/MAYA-AI.apk
+          name: "MAYA AI Android Release v1.0.\${{ github.run_number }}"
+          tag_name: "v1.0.\${{ github.run_number }}"`}
             </pre>
           </div>
         </div>
