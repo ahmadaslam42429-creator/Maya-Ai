@@ -136,14 +136,60 @@ export function processLocalBrainMessage(
 
   if (lower.includes('open camera') || lower.includes('take a photo') || lower.includes('camera') || text.includes('کیمرہ')) {
     return {
-      reply: isUrdu ? 'اینڈرائیڈ کیمرہ سینسرز فعال کیے جا رہے ہیں۔' : 'Initializing Android optical camera sensors.',
+      reply: isUrdu ? 'اینڈرائیڈ کیمرہ سینسرز اور آپٹیکل ویژن اسٹوڈیو فعال کیا جا رہا ہے۔' : 'Initializing Android optical camera sensors and Vision Studio.',
       emotion: 'excited',
       detectedLanguage: isUrdu ? 'ur' : 'en',
       action: {
         type: 'open_app',
-        title: 'Open Camera',
+        title: 'Open Vision Camera',
         description: 'Activate device optical camera sensors',
         payload: { appName: 'camera' },
+        requiresConfirmation: false,
+      },
+    };
+  }
+
+  // Avatar Posture Control Commands
+  if (lower.includes('stand up') || lower.includes('stand') || text.includes('کھڑے ہو')) {
+    return {
+      reply: isUrdu ? 'میں کھڑے ہونے کی پوزیشن میں تبدیل ہو رہی ہوں۔' : 'Switching 3D avatar kinematics to standing stage posture.',
+      emotion: 'excited',
+      detectedLanguage: isUrdu ? 'ur' : 'en',
+      action: {
+        type: 'open_app',
+        title: 'Avatar Posture: STAND',
+        description: 'Transition avatar to standing posture',
+        payload: { pose: 'stand' },
+        requiresConfirmation: false,
+      },
+    };
+  }
+
+  if (lower.includes('sit down') || lower.includes('sit') || text.includes('بیٹھ جاؤ')) {
+    return {
+      reply: isUrdu ? 'میں اپنی ورک اسٹیشن چیئر پر بیٹھ رہی ہوں۔' : 'Returning 3D avatar to natural seated workstation posture.',
+      emotion: 'happy',
+      detectedLanguage: isUrdu ? 'ur' : 'en',
+      action: {
+        type: 'open_app',
+        title: 'Avatar Posture: SIT',
+        description: 'Transition avatar to seated workstation',
+        payload: { pose: 'sit' },
+        requiresConfirmation: false,
+      },
+    };
+  }
+
+  if (lower.includes('wave') || text.includes('ہاتھ ہلاؤ')) {
+    return {
+      reply: isUrdu ? 'ہیلو کمانڈر! میں آپ کو خوش آمدید کہتی ہوں۔' : 'Greetings Commander! Waving to you from the holographic stage.',
+      emotion: 'happy',
+      detectedLanguage: isUrdu ? 'ur' : 'en',
+      action: {
+        type: 'open_app',
+        title: 'Avatar Pose: WAVE',
+        description: 'Execute waving hand animation',
+        payload: { pose: 'wave' },
         requiresConfirmation: false,
       },
     };

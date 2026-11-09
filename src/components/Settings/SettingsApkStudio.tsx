@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { VoiceSettings } from '../../types/assistant';
-import { Settings, Sliders, Volume2, Mic, Smartphone, Download, Copy, Check, FileCode, Shield, Layers, HelpCircle, Terminal, GitBranch } from 'lucide-react';
+import { VoiceSettings, AvatarPose } from '../../types/assistant';
+import { Settings, Sliders, Volume2, Mic, Smartphone, Download, Copy, Check, FileCode, Shield, Layers, HelpCircle, Terminal, GitBranch, User, Sparkles, Eye } from 'lucide-react';
 import { VoiceService } from '../../services/voiceService';
 import { AndroidIntentService } from '../../services/androidIntents';
+import { RealisticMayaAvatar } from '../Avatar/RealisticMayaAvatar';
 
 interface SettingsApkStudioProps {
   settings: VoiceSettings;
   onUpdateSettings: (newSettings: VoiceSettings) => void;
   onThemeChange?: (theme: string) => void;
   activeTheme?: string;
+  avatarPose?: AvatarPose;
+  onPoseChange?: (pose: AvatarPose) => void;
 }
 
 export const SettingsApkStudio: React.FC<SettingsApkStudioProps> = ({
@@ -16,10 +19,15 @@ export const SettingsApkStudio: React.FC<SettingsApkStudioProps> = ({
   onUpdateSettings,
   onThemeChange,
   activeTheme = 'navy',
+  avatarPose = 'sit',
+  onPoseChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<'voice' | 'github_actions' | 'apk_guide' | 'manifest' | 'kotlin' | 'architecture'>('github_actions');
+  const [activeTab, setActiveTab] = useState<'avatar' | 'voice' | 'github_actions' | 'apk_guide' | 'manifest' | 'kotlin' | 'architecture'>('avatar');
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [selectedPose, setSelectedPose] = useState<AvatarPose>(avatarPose);
+  const [lipSyncEnabled, setLipSyncEnabled] = useState(true);
+  const [avatarQuality, setAvatarQuality] = useState<'ultra' | 'high' | 'balanced'>('ultra');
 
   useEffect(() => {
     const loadVoices = () => {
@@ -207,6 +215,15 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
         {/* Tab Switcher */}
         <div className="flex items-center gap-1 bg-[#050A17] p-1 rounded-xl border border-white/10 overflow-x-auto scrollbar-none">
           <button
+            onClick={() => setActiveTab('avatar')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-tech transition-all shrink-0 ${
+              activeTab === 'avatar' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>3D Avatar Studio</span>
+          </button>
+          <button
             onClick={() => setActiveTab('github_actions')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-tech transition-all shrink-0 ${
               activeTab === 'github_actions' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
@@ -262,6 +279,150 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
           </button>
         </div>
       </div>
+
+      {/* Tab: 3D Avatar Customization Studio */}
+      {activeTab === 'avatar' && (
+        <div className="space-y-4 animate-fadeIn text-xs font-tech">
+          <div className="p-4 rounded-xl bg-gradient-to-r from-[#071330] to-[#0E1F4B] border border-cyan-500/40 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="w-5 h-5 text-cyan-400" />
+                <h4 className="text-sm font-bold font-hud text-white">MAYA 3D Avatar Configuration</h4>
+              </div>
+              <p className="text-slate-300 leading-relaxed text-xs">
+                Fine-tune skeletal poses, camera framing, real-time phoneme lip-sync, and 3D rendering parameters.
+              </p>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-cyan-950 border border-cyan-400 text-cyan-300 font-hud text-[10px] font-bold shrink-0">
+              WebGL 60 FPS
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Left Column: Live Avatar Preview */}
+            <div className="flex flex-col items-center justify-center p-3 rounded-2xl bg-[#040816] border border-cyan-500/30">
+              <span className="text-[10px] font-hud text-cyan-400 uppercase tracking-widest mb-2 block">
+                Live Interactive Viewport
+              </span>
+              <RealisticMayaAvatar
+                activePose={selectedPose}
+                onPoseChange={(p) => {
+                  setSelectedPose(p);
+                  onPoseChange?.(p);
+                }}
+                size="md"
+                framing="upper"
+                showControls={false}
+              />
+              <div className="flex items-center gap-1.5 mt-3">
+                {(['sit', 'stand', 'wave', 'think', 'talk'] as AvatarPose[]).map((pose) => (
+                  <button
+                    key={pose}
+                    onClick={() => {
+                      setSelectedPose(pose);
+                      onPoseChange?.(pose);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg uppercase text-[10px] font-hud font-bold transition-all ${
+                      selectedPose === pose
+                        ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/30'
+                        : 'bg-[#081534] border border-cyan-500/20 text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {pose}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column: Customization Controls */}
+            <div className="space-y-3">
+              {/* Default Pose Setting */}
+              <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-2">
+                <span className="font-hud font-bold text-cyan-300 text-xs block">Default Session Posture</span>
+                <p className="text-slate-400 text-[11px]">
+                  Choose whether MAYA starts seated at her workstation or standing on stage.
+                </p>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    onClick={() => {
+                      setSelectedPose('sit');
+                      onPoseChange?.('sit');
+                    }}
+                    className={`py-2 px-3 rounded-xl font-hud text-xs font-bold border transition-all ${
+                      selectedPose === 'sit'
+                        ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-sm'
+                        : 'bg-[#071330] border-white/10 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    🪑 Seated Workstation (Default)
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedPose('stand');
+                      onPoseChange?.('stand');
+                    }}
+                    className={`py-2 px-3 rounded-xl font-hud text-xs font-bold border transition-all ${
+                      selectedPose === 'stand'
+                        ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-sm'
+                        : 'bg-[#071330] border-white/10 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    🧍 Standing Stage Mode
+                  </button>
+                </div>
+              </div>
+
+              {/* Lip-Sync & Audio Rigging */}
+              <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-hud font-bold text-cyan-300 text-xs block">Phoneme Lip-Syncing</span>
+                    <span className="text-[11px] text-slate-400">
+                      Sync mouth visemes in real-time with spoken TTS sentences.
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setLipSyncEnabled(!lipSyncEnabled)}
+                    className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
+                      lipSyncEnabled ? 'bg-cyan-500' : 'bg-slate-700'
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                        lipSyncEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Rendering Performance Mode */}
+              <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-2">
+                <span className="font-hud font-bold text-cyan-300 text-xs block">Render Quality & Frame Pacing</span>
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  {[
+                    { id: 'ultra', label: 'Ultra (60 FPS)' },
+                    { id: 'high', label: 'High (Balanced)' },
+                    { id: 'balanced', label: 'Battery Saver' },
+                  ].map((q) => (
+                    <button
+                      key={q.id}
+                      onClick={() => setAvatarQuality(q.id as any)}
+                      className={`py-1.5 px-2 rounded-lg font-tech text-xs border transition-colors ${
+                        avatarQuality === q.id
+                          ? 'bg-cyan-500 text-slate-950 font-bold border-cyan-400'
+                          : 'bg-[#071330] border-white/10 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {q.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tab: GitHub Actions Automated Build & Release */}
       {activeTab === 'github_actions' && (

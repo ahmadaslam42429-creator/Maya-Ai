@@ -1,6 +1,6 @@
 import React from 'react';
 import { EmotionType, LanguageCode } from '../../types/assistant';
-import { MayaAvatar } from '../Avatar/MayaAvatar';
+import { RealisticMayaAvatar } from '../Avatar/RealisticMayaAvatar';
 import { VoiceWaveform } from './VoiceWaveform';
 import { Mic, MicOff, Square, Sparkles, MessageSquare, Volume2, Shield, Radio } from 'lucide-react';
 import { VoiceService } from '../../services/voiceService';
@@ -42,12 +42,12 @@ export const VoiceAssistantScreen: React.FC<VoiceAssistantScreenProps> = ({
   ];
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-between p-4 max-w-xl mx-auto w-full relative">
+    <div className="flex-1 flex flex-col items-center justify-between p-3 max-w-xl mx-auto w-full relative">
       {/* HUD Telemetry Top Bar */}
-      <div className="w-full flex items-center justify-between py-1 px-3 rounded-xl bg-black/40 border border-cyan-500/20 backdrop-blur-md text-[10px] font-hud text-cyan-400">
+      <div className="w-full flex items-center justify-between py-1.5 px-3 rounded-xl bg-black/40 border border-cyan-500/20 backdrop-blur-md text-[10px] font-hud text-cyan-400">
         <div className="flex items-center gap-1.5">
           <Radio className={`w-3.5 h-3.5 ${isListening ? 'text-emerald-400 animate-ping' : 'text-cyan-400'}`} />
-          <span>FREQ: 142.85 MHz</span>
+          <span>FREQ: 142.85 MHz • AUDIO BUFFER ACTIVE</span>
         </div>
         <div className="flex items-center gap-2">
           <span>NEURAL STATUS: OPTIMAL</span>
@@ -55,26 +55,16 @@ export const VoiceAssistantScreen: React.FC<VoiceAssistantScreenProps> = ({
         </div>
       </div>
 
-      {/* Center Holographic Avatar & Reactor Core */}
-      <div className="relative my-4 flex flex-col items-center justify-center">
-        {/* Outer Rotating Degree Ring */}
-        <div className="absolute w-72 h-72 sm:w-96 sm:h-96 rounded-full border border-cyan-500/15 pointer-events-none animate-spin-slow">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 text-[9px] font-hud text-cyan-400/60">000°</div>
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-2 text-[9px] font-hud text-cyan-400/60">180°</div>
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 text-[9px] font-hud text-cyan-400/60">270°</div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 text-[9px] font-hud text-cyan-400/60">090°</div>
-        </div>
-
-        {/* Counter-rotating Secondary Ring */}
-        <div className="absolute w-80 h-80 sm:w-[410px] sm:h-[410px] rounded-full border border-purple-500/10 pointer-events-none animate-spin-reverse-slow" />
-
-        {/* Maya Avatar */}
-        <MayaAvatar
+      {/* Center 3D Realistic Maya Avatar */}
+      <div className="w-full my-2 flex flex-col items-center justify-center">
+        <RealisticMayaAvatar
           emotion={emotion}
           isListening={isListening}
           isSpeaking={isSpeaking}
+          activePose={isListening ? 'talk' : isSpeaking ? 'talk' : 'sit'}
           size="hero"
-          onClick={onToggleListening}
+          framing="upper"
+          showControls={true}
         />
       </div>
 

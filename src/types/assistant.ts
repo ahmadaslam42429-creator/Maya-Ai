@@ -64,3 +64,38 @@ export interface ReminderItem {
   completed: boolean;
   createdAt: string;
 }
+
+export type AvatarPose = 'sit' | 'stand' | 'talk' | 'idle' | 'wave' | 'think';
+export type AvatarPosition = 'left' | 'center' | 'right';
+export type AvatarSize = 'sm' | 'md' | 'lg' | 'hero';
+export type AvatarFraming = 'upper' | 'full';
+
+export interface AvatarSettings {
+  pose: AvatarPose;
+  position: AvatarPosition;
+  size: AvatarSize;
+  framing: AvatarFraming;
+  visible: boolean;
+  quality: 'ultra' | 'high' | 'balanced';
+  lipSyncEnabled: boolean;
+  showHoloDesk: boolean;
+}
+
+export interface VisionAnalysisResult {
+  reply: string;
+  detectedObjects: string[];
+  textRecognized: string;
+  sceneType?: string;
+  actionRecommendation?: string;
+  imageUrl?: string;
+  timestamp: string;
+}
+
+export interface LiveSearchResult {
+  query: string;
+  summary: string;
+  sources: Array<{ title: string; url: string }>;
+  webSearchQueries?: string[];
+  verified: boolean;
+  timestamp: string;
+}

@@ -18,10 +18,13 @@ import { StudySummarizer } from './components/Tools/StudySummarizer';
 import { NeuralTranslator } from './components/Tools/NeuralTranslator';
 import { MemoryNotesManager } from './components/Memory/MemoryNotesManager';
 import { SettingsApkStudio } from './components/Settings/SettingsApkStudio';
+import { HomeHeroScreen } from './components/Home/HomeHeroScreen';
+import { VisionSearchStudio } from './components/Vision/VisionSearchStudio';
 import { VoiceService } from './services/voiceService';
 import { AndroidIntentService } from './services/androidIntents';
 import { processLocalBrainMessage } from './services/localAiBrain';
 import { 
+  Home,
   Mic, 
   MessageSquare, 
   Wrench, 
@@ -37,13 +40,29 @@ import {
   Compass,
   Calculator as CalcIcon,
   BookOpen,
-  Languages
+  Languages,
+  Camera,
+  Search
 } from 'lucide-react';
+import { AvatarPose } from './types/assistant';
 
 export default function App() {
-  // Navigation Screens
-  const [currentScreen, setCurrentScreen] = useState<'voice' | 'chat' | 'tools' | 'android' | 'memory' | 'settings'>('voice');
+  // Navigation Screens (Default to Home with 3D Avatar)
+  const [currentScreen, setCurrentScreen] = useState<'home' | 'chat' | 'voice' | 'vision' | 'tools' | 'android' | 'memory' | 'settings'>('home');
   const [toolsTab, setToolsTab] = useState<'weather' | 'calc' | 'summarizer' | 'translator'>('weather');
+
+  // 3D Avatar Pose State (Persisted in localStorage)
+  const [avatarPose, setAvatarPose] = useState<AvatarPose>(() => {
+    try {
+      const saved = localStorage.getItem('maya_avatar_pose');
+      if (saved) return saved as AvatarPose;
+    } catch {}
+    return 'sit'; // Default seated workstation pose matching uploaded reference image
+  });
+
+  useEffect(() => {
+    localStorage.setItem('maya_avatar_pose', avatarPose);
+  }, [avatarPose]);
 
   // Core Assistant States
   const [emotion, setEmotion] = useState<EmotionType>('happy');
@@ -410,7 +429,7 @@ export default function App() {
           {/* Logo & Mini Avatar */}
           <div className="flex items-center gap-3">
             <div
-              onClick={() => setCurrentScreen('voice')}
+              onClick={() => setCurrentScreen('home')}
               className="cursor-pointer transition-transform hover:scale-105"
             >
               <MayaAvatar
@@ -427,7 +446,7 @@ export default function App() {
                   MAYA AI
                 </span>
                 <span className="text-[9px] font-hud px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-500/40 text-cyan-300">
-                  v2.5
+                  v3.0 3D
                 </span>
               </div>
               <div className="text-[10px] font-tech text-cyan-400/80 flex items-center gap-1.5">
@@ -438,12 +457,14 @@ export default function App() {
           </div>
 
           {/* Center Screen Switcher (HUD / Chat / Tools / Android / Vault / APK) */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#040816] p-1 rounded-2xl border border-cyan-500/20 shadow-inner">
+          <nav className="hidden lg:flex items-center gap-1 bg-[#040816] p-1 rounded-2xl border border-cyan-500/20 shadow-inner">
             {[
-              { id: 'voice', label: 'Voice HUD', icon: Mic },
+              { id: 'home', label: '3D Stage', icon: Home },
               { id: 'chat', label: 'Chat Stream', icon: MessageSquare },
+              { id: 'voice', label: 'Voice HUD', icon: Mic },
+              { id: 'vision', label: 'Vision & Search', icon: Camera },
               { id: 'tools', label: 'Tools Matrix', icon: Wrench },
-              { id: 'android', label: 'Android Intents', icon: Smartphone },
+              { id: 'android', label: 'Android Phone', icon: Smartphone },
               { id: 'memory', label: 'Memory Vault', icon: Brain },
               { id: 'settings', label: 'Settings & APK', icon: Settings },
             ].map((tab) => {
@@ -483,6 +504,24 @@ export default function App() {
 
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 max-w-5xl mx-auto w-full p-3 sm:p-4 flex flex-col justify-between">
+        {/* VIEW 0: 3D Stage / Home Cockpit Screen */}
+        {currentScreen === 'home' && (
+          <HomeHeroScreen
+            emotion={emotion}
+            isListening={isListening}
+            isSpeaking={isSpeaking}
+            onToggleListening={handleToggleListening}
+            onStopSpeaking={handleStopSpeaking}
+            interimTranscript={interimTranscript}
+            lastReply={lastReply}
+            activeLanguage={voiceSettings.language}
+            onQuickCommand={handleSendMessage}
+            onNavigate={(screen) => setCurrentScreen(screen as any)}
+            avatarPose={avatarPose}
+            onPoseChange={setAvatarPose}
+          />
+        )}
+
         {/* VIEW 1: Fullscreen Voice Assistant Screen */}
         {currentScreen === 'voice' && (
           <VoiceAssistantScreen
@@ -500,7 +539,30 @@ export default function App() {
           />
         )}
 
-        {/* VIEW 2: Chat Screen */}
+        {/* VIEW 2: Optical Vision & Grounded Search Studio */}
+        {currentScreen === 'vision' && (
+          <VisionSearchStudio
+            onSpeak={(text) => {
+              setIsSpeaking(true);
+              VoiceService.speak(text, {
+                rate: voiceSettings.rate,
+                pitch: voiceSettings.pitch,
+                volume: voiceSettings.volume,
+                voiceURI: voiceSettings.voiceURI,
+                language: voiceSettings.language,
+                onStart: () => setIsSpeaking(true),
+                onEnd: () => setIsSpeaking(false),
+                onError: () => setIsSpeaking(false),
+              });
+            }}
+            onSendToChat={(text) => {
+              handleSendMessage(text);
+              setCurrentScreen('chat');
+            }}
+          />
+        )}
+
+        {/* VIEW 3: Chat Screen */}
         {currentScreen === 'chat' && (
           <div className="flex-1 flex flex-col h-[calc(100vh-170px)] sm:h-[calc(100vh-160px)]">
             <ChatMessageList
@@ -528,7 +590,7 @@ export default function App() {
           </div>
         )}
 
-        {/* VIEW 3: Tools & Intelligence Matrix */}
+        {/* VIEW 4: Tools & Intelligence Matrix */}
         {currentScreen === 'tools' && (
           <div className="flex-1 flex flex-col space-y-4">
             {/* Tools Tabs Bar */}
@@ -566,39 +628,41 @@ export default function App() {
           </div>
         )}
 
-        {/* VIEW 4: Android Subsystems & Actions */}
+        {/* VIEW 5: Android Subsystems & Actions */}
         {currentScreen === 'android' && (
           <AndroidActionCenter
             onRequestActionConfirm={(action) => setPendingAction(action)}
           />
         )}
 
-        {/* VIEW 5: Memory & Notes Vault */}
+        {/* VIEW 6: Memory & Notes Vault */}
         {currentScreen === 'memory' && (
           <MemoryNotesManager onClearHistory={handleClearHistory} />
         )}
 
-        {/* VIEW 6: Settings & APK Studio */}
+        {/* VIEW 7: Settings & APK Studio */}
         {currentScreen === 'settings' && (
           <SettingsApkStudio
             settings={voiceSettings}
             onUpdateSettings={setVoiceSettings}
             activeTheme={activeTheme}
             onThemeChange={setActiveTheme}
+            avatarPose={avatarPose}
+            onPoseChange={setAvatarPose}
           />
         )}
       </main>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      {/* MOBILE BOTTOM NAVIGATION BAR (Home, Chat, Voice, Vision, History, Settings) */}
       <footer className="md:hidden sticky bottom-0 z-40 bg-[#050C1F]/95 border-t border-cyan-500/30 backdrop-blur-xl px-2 py-2">
         <div className="grid grid-cols-6 gap-1">
           {[
-            { id: 'voice', label: 'HUD', icon: Mic },
+            { id: 'home', label: 'Home', icon: Home },
             { id: 'chat', label: 'Chat', icon: MessageSquare },
-            { id: 'tools', label: 'Tools', icon: Wrench },
-            { id: 'android', label: 'Phone', icon: Smartphone },
-            { id: 'memory', label: 'Memory', icon: Brain },
-            { id: 'settings', label: 'APK', icon: Settings },
+            { id: 'voice', label: 'Voice', icon: Mic },
+            { id: 'vision', label: 'Vision', icon: Camera },
+            { id: 'memory', label: 'History', icon: Brain },
+            { id: 'settings', label: 'Settings', icon: Settings },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = currentScreen === tab.id;
