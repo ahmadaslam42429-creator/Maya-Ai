@@ -11,12 +11,12 @@ on:
     inputs:
       create_release:
         description: 'Publish GitHub Release for this build'
-        required: false
+        required: true
         type: boolean
-        default: false
+        default: true
       release_tag:
         description: 'Release tag name (e.g., v1.0.0)'
-        required: false
+        required: true
         default: 'v1.0.0'
 
 permissions:
@@ -26,6 +26,8 @@ jobs:
   build:
     name: Build Android Debug APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Source Code
@@ -65,7 +67,7 @@ jobs:
         run: |
           ./gradlew assembleDebug --stacktrace --no-daemon
 
-      - name: Verify and Standardize Debug APK Name
+      - name: Verify and Standardize Debug APK Output
         id: verify_apk
         run: |
           mkdir -p build-artifacts
@@ -74,16 +76,19 @@ jobs:
           if [ -f "$OUTPUT_DIR/MAYA-AI-debug.apk" ]; then
             echo "Found MAYA-AI-debug.apk"
             cp "$OUTPUT_DIR/MAYA-AI-debug.apk" build-artifacts/MAYA-AI-debug.apk
+            cp "$OUTPUT_DIR/MAYA-AI-debug.apk" build-artifacts/MAYA-AI.apk
           elif [ -f "$OUTPUT_DIR/app-debug.apk" ]; then
-            echo "Renaming app-debug.apk to MAYA-AI-debug.apk"
+            echo "Renaming app-debug.apk to MAYA-AI-debug.apk and MAYA-AI.apk"
             cp "$OUTPUT_DIR/app-debug.apk" "$OUTPUT_DIR/MAYA-AI-debug.apk"
             cp "$OUTPUT_DIR/app-debug.apk" build-artifacts/MAYA-AI-debug.apk
+            cp "$OUTPUT_DIR/app-debug.apk" build-artifacts/MAYA-AI.apk
           else
             echo "Searching for any generated .apk..."
             FOUND_APK=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
             if [ -n "$FOUND_APK" ]; then
               cp "$FOUND_APK" "$OUTPUT_DIR/MAYA-AI-debug.apk"
               cp "$FOUND_APK" build-artifacts/MAYA-AI-debug.apk
+              cp "$FOUND_APK" build-artifacts/MAYA-AI.apk
             else
               echo "Error: No APK found in output directory!"
               exit 1
@@ -91,30 +96,49 @@ jobs:
           fi
 
           echo "APK generated successfully:"
-          ls -lh build-artifacts/MAYA-AI-debug.apk
-          sha256sum build-artifacts/MAYA-AI-debug.apk
+          ls -lh build-artifacts/
+          sha256sum build-artifacts/MAYA-AI.apk
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: MAYA-AI-debug-apk
-          path: build-artifacts/MAYA-AI-debug.apk
+          path: |
+            build-artifacts/MAYA-AI.apk
+            build-artifacts/MAYA-AI-debug.apk
           retention-days: 14
 
+      - name: Determine Release Tag
+        id: release_info
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == 'true' || github.event.inputs.create_release == true
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+          elif [ -n "${{ github.event.inputs.release_tag }}" ]; then
+            TAG_NAME="${{ github.event.inputs.release_tag }}"
+          else
+            TAG_NAME="v1.0.0"
+          fi
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "release_name=MAYA AI $TAG_NAME" >> $GITHUB_OUTPUT
+
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == true
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == 'true' || github.event.inputs.create_release == true
         uses: softprops/action-gh-release@v2
         with:
-          files: build-artifacts/MAYA-AI-debug.apk
-          name: "MAYA AI ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.event.inputs.release_tag }}"
-          tag_name: "${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.event.inputs.release_tag }}"
+          files: |
+            build-artifacts/MAYA-AI.apk
+            build-artifacts/MAYA-AI-debug.apk
+          name: ${{ steps.release_info.outputs.release_name }}
+          tag_name: ${{ steps.release_info.outputs.tag_name }}
+          target_commitish: ${{ github.sha }}
           draft: false
           prerelease: false
           generate_release_notes: true
           body: |
-            ### 🚀 MAYA AI — Personal AI Assistant (Android Debug Build)
+            ### 🚀 MAYA AI — Personal AI Assistant (Android Release)
 
-            **Features in this release:**
+            **Features in this build:**
             - 🧠 **JARVIS-Inspired Assistant Core**: Powered by Google Gemini AI (`gemini-3.8-flash`).
             - 🎭 **Expressive Holographic Avatar**: 7 animated emotional states (Happy, Thinking, Excited, Caring, Confused, Serious, Sad).
             - 🎙️ **Voice Assistant Engine**: Full Speech-to-Text & Text-to-Speech with customizable female voice and 60fps audio waveform.
@@ -123,8 +147,9 @@ jobs:
             - 🔒 **Security First**: Action Confirmation Modal protects sensitive device triggers.
 
             #### 📲 Installation Instructions:
-            1. Download `MAYA-AI-debug.apk` attached below.
-            2. On your Android phone, tap to install.
-            3. Grant Microphone and Notification permissions when prompted.
+            1. Download `MAYA-AI.apk` (or `MAYA-AI-debug.apk`) attached below.
+            2. On your Android phone, tap the downloaded APK to install.
+            3. Enable *"Install unknown apps"* for your browser or file manager if prompted.
+            4. Launch MAYA AI and grant Microphone and Notification permissions.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

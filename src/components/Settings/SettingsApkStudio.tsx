@@ -312,51 +312,50 @@ git push -u origin main`}
             <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-hud font-bold text-cyan-300 text-xs">
-                  2. Automatic or Manual Build
+                  2. Automatic Build on Push
                 </span>
-                <span className="text-[10px] font-mono text-slate-500">workflow_dispatch</span>
+                <span className="text-[10px] font-mono text-emerald-400">Push to main</span>
               </div>
               <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
-                <li><strong>Automatic:</strong> Push any commit to <code className="text-cyan-300">main</code>.</li>
-                <li><strong>Manual:</strong> In GitHub, go to <em>Actions</em> &gt; <em>MAYA AI Android Build &amp; Release</em> &gt; <em>Run workflow</em>.</li>
-                <li>Uses Gradle 8.5 with JDK 17 to build <code className="text-cyan-300">MAYA-AI-debug.apk</code>.</li>
+                <li>Every commit to <code className="text-cyan-300">main</code> automatically compiles the APK and attaches it to the workflow artifacts.</li>
+                <li>Builds <code className="text-cyan-300">MAYA-AI.apk</code> and <code className="text-cyan-300">MAYA-AI-debug.apk</code> via Gradle 8.5 &amp; JDK 17.</li>
               </ul>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-hud font-bold text-cyan-300 text-xs">
-                  3. Download APK from Artifacts
-                </span>
-                <span className="text-[10px] font-mono text-slate-500">14-Day Retention</span>
-              </div>
-              <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
-                <li>Click the completed run in your GitHub <strong>Actions</strong> tab.</li>
-                <li>Scroll to the <strong>Artifacts</strong> section at the bottom.</li>
-                <li>Click <strong>MAYA-AI-debug-apk</strong> to download the zip containing <code className="text-cyan-300">MAYA-AI-debug.apk</code>.</li>
-              </ul>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-hud font-bold text-cyan-300 text-xs">
-                  4. Publish GitHub Release
+                  3. Trigger GitHub Release (2 Ways)
                 </span>
                 <button
                   onClick={() => copyToClipboard('git tag v1.0.0\ngit push origin v1.0.0', 'git_tag')}
                   className="text-cyan-400 hover:text-white flex items-center gap-1 text-[11px]"
                 >
                   {copiedKey === 'git_tag' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>Copy</span>
+                  <span>Copy Tag Cmd</span>
                 </button>
               </div>
-              <pre className="p-2 rounded bg-black/60 text-cyan-200 font-mono text-[10px] overflow-x-auto">
-{`git tag v1.0.0
-git push origin v1.0.0`}
-              </pre>
-              <p className="text-[10px] text-slate-400">
-                Pushing a tag automatically creates an official GitHub Release with release notes and attaches <code className="text-cyan-300">MAYA-AI-debug.apk</code>!
-              </p>
+              <div className="space-y-1 text-[11px] text-slate-300 leading-relaxed">
+                <p><strong>Option A (Recommended):</strong> Push a version tag:</p>
+                <code className="block p-1.5 rounded bg-black/60 text-cyan-200 font-mono text-[10px]">
+                  git tag v1.0.0 && git push origin v1.0.0
+                </code>
+                <p><strong>Option B (No Git CLI needed):</strong> In GitHub, go to <em>Actions</em> &gt; <em>MAYA AI Android Build &amp; Release</em> &gt; <em>Run workflow</em> &gt; click <strong>Run workflow</strong>.</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-hud font-bold text-cyan-300 text-xs">
+                  4. Download MAYA-AI.apk
+                </span>
+                <span className="text-[10px] font-mono text-cyan-400">Releases &amp; Artifacts</span>
+              </div>
+              <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
+                <li>Under <strong>Releases</strong> on your GitHub repo, click <strong>MAYA AI v1.0.0</strong> to download <code className="text-cyan-300">MAYA-AI.apk</code>.</li>
+                <li>Or go to <strong>Actions</strong> &gt; click the latest run &gt; scroll to <strong>Artifacts</strong> &gt; click <code className="text-cyan-300">MAYA-AI-debug-apk</code>.</li>
+                <li><em>Tip:</em> Ensure GitHub repo <strong>Settings &gt; Actions &gt; General &gt; Workflow permissions</strong> is set to <strong>"Read and write permissions"</strong>.</li>
+              </ul>
             </div>
           </div>
 
