@@ -312,6 +312,37 @@ export const AndroidActionCenter: React.FC<AndroidActionCenterProps> = ({ onRequ
               <span>Settings</span>
             </button>
             <button
+              onClick={() => handleAppLaunch('Instagram')}
+              className="p-2 rounded-lg bg-[#09142E] hover:bg-pink-950/40 border border-pink-500/30 text-pink-300 text-xs font-tech font-semibold flex items-center justify-center gap-1 transition-all"
+            >
+              <span>Instagram</span>
+            </button>
+            <button
+              onClick={() => handleAppLaunch('Facebook')}
+              className="p-2 rounded-lg bg-[#09142E] hover:bg-blue-950/40 border border-blue-500/30 text-blue-300 text-xs font-tech font-semibold flex items-center justify-center gap-1 transition-all"
+            >
+              <span>Facebook</span>
+            </button>
+            <button
+              onClick={() => handleAppLaunch('TikTok')}
+              className="p-2 rounded-lg bg-[#09142E] hover:bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 text-xs font-tech font-semibold flex items-center justify-center gap-1 transition-all"
+            >
+              <span>TikTok</span>
+            </button>
+            <button
+              onClick={() => AndroidIntentService.openSystemSetting('wifi')}
+              className="p-2 rounded-lg bg-[#09142E] hover:bg-teal-950/40 border border-teal-500/30 text-teal-300 text-xs font-tech font-semibold flex items-center justify-center gap-1 transition-all"
+            >
+              <Wifi className="w-3.5 h-3.5" />
+              <span>Wi-Fi</span>
+            </button>
+            <button
+              onClick={() => AndroidIntentService.openSystemSetting('bluetooth')}
+              className="p-2 rounded-lg bg-[#09142E] hover:bg-indigo-950/40 border border-indigo-500/30 text-indigo-300 text-xs font-tech font-semibold flex items-center justify-center gap-1 transition-all"
+            >
+              <span>Bluetooth</span>
+            </button>
+            <button
               onClick={handleShareSystem}
               className="p-2 rounded-lg bg-[#09142E] hover:bg-purple-950/40 border border-purple-500/30 text-purple-300 text-xs font-tech font-semibold flex items-center justify-center gap-1 transition-all"
             >

@@ -111,7 +111,7 @@ export const VoiceWaveform: React.FC<VoiceWaveformProps> = ({
         {/* Status badges inside waveform */}
         <div className="absolute top-1.5 left-3 flex items-center gap-1.5 text-[9px] font-tech text-cyan-400/80 tracking-widest uppercase">
           <span className={`w-1.5 h-1.5 rounded-full ${isListening ? 'bg-emerald-400 animate-ping' : isSpeaking ? 'bg-purple-400 animate-pulse' : 'bg-cyan-500/50'}`} />
-          {isListening ? 'AUDIO INPUT ACTIVE [MIC ON]' : isSpeaking ? 'MAYA SYNTHESIZING VOICE' : 'AUDIO HUD IDLE'}
+          {isListening ? 'AUDIO INPUT ACTIVE [MIC ON]' : isSpeaking ? 'AYRA SYNTHESIZING VOICE' : 'AUDIO HUD IDLE'}
         </div>
 
         <div className="absolute bottom-1 right-3 text-[9px] font-hud text-slate-500">

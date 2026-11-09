@@ -478,6 +478,142 @@ app.post('/api/gemini/search', async (req: Request, res: Response) => {
   }
 });
 
+// Natural Female Speech Synthesis (TTS) via Gemini 3.8 Flash Lite TTS
+app.post('/api/gemini/tts', async (req: Request, res: Response) => {
+  try {
+    const { text, voice = 'Kore' } = req.body;
+    if (!text || typeof text !== 'string') {
+      return res.status(400).json({ error: 'Text is required for TTS synthesis.' });
+    }
+
+    const ai = getGeminiClient();
+    if (!ai) {
+      return res.json({ fallbackToClientTts: true, reason: 'AI core offline' });
+    }
+
+    // Limit text to 600 characters for snappy interactive speech
+    const cleanSpeechText = text
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/[*_#`~>-]/g, '')
+      .slice(0, 600);
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.8-flash-lite-tts',
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              text: cleanSpeechText,
+            },
+          ],
+        },
+      ],
+      config: {
+        responseModalities: ['AUDIO'],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: voice || 'Kore' },
+          },
+        },
+      },
+    });
+
+    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (!base64Audio) {
+      return res.json({ fallbackToClientTts: true, reason: 'Audio generation returned empty' });
+    }
+
+    return res.json({
+      audio: base64Audio,
+      mimeType: 'audio/wav',
+      voice: voice || 'Kore',
+      success: true,
+    });
+  } catch (err: any) {
+    console.warn('Gemini TTS fallback invoked:', err?.message || err);
+    return res.json({ fallbackToClientTts: true, error: err?.message });
+  }
+});
+
+// In-App Browser Page Reader & Intelligence Synthesizer
+app.post('/api/browser/read', async (req: Request, res: Response) => {
+  try {
+    const { url, question, userLanguage = 'en' } = req.body;
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'Valid URL is required.' });
+    }
+
+    // Attempt to fetch webpage with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    let pageTitle = url;
+    let pageContent = '';
+
+    try {
+      const pageRes = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 14; AYRA-AI-Assistant) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+      });
+      clearTimeout(timeoutId);
+
+      const html = await pageRes.text();
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      if (titleMatch) {
+        pageTitle = titleMatch[1].trim();
+      }
+
+      // Extract text content, stripping scripts, styles, and tags
+      pageContent = html
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 10000);
+    } catch (fetchErr: any) {
+      pageContent = `Unable to fetch live HTML directly (${fetchErr?.message || 'CORS or Network Block'}). Providing analytical synthesis based on domain and URL query structure.`;
+    }
+
+    const ai = getGeminiClient();
+    if (!ai) {
+      return res.json({
+        title: pageTitle,
+        url,
+        summary: `Webpage summary for "${pageTitle}": Extracted content contains approx ${pageContent.length} characters. Active Gemini connection will provide in-depth multi-source synthesis.`,
+        keyTakeaways: ['Source reachable', 'Content parsed', 'Available for reference'],
+        answer: question ? `Offline answer for: "${question}"` : undefined,
+      });
+    }
+
+    const prompt = question
+      ? `Based on the following content extracted from ${url} (${pageTitle}):\n"""\n${pageContent}\n"""\nAnswer the user's question accurately in ${userLanguage}: "${question}". Return JSON: { "answer": "Detailed answer", "relevantExcerpt": "Brief excerpt" }`
+      : `Summarize the following webpage content from ${url} (${pageTitle}) in ${userLanguage}:\n"""\n${pageContent}\n"""\nReturn JSON: { "summary": "Comprehensive 2-paragraph summary", "keyTakeaways": ["Bullet 1", "Bullet 2", "Bullet 3", "Bullet 4"] }`;
+
+    const aiRes = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+      },
+    });
+
+    const parsed = JSON.parse(aiRes.text || '{}');
+    return res.json({
+      title: pageTitle,
+      url,
+      ...parsed,
+    });
+  } catch (err: any) {
+    console.error('Browser read error:', err);
+    return res.status(500).json({ error: err?.message || 'Failed to read webpage content.' });
+  }
+});
+
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({

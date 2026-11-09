@@ -41,11 +41,11 @@ export const SettingsApkStudio: React.FC<SettingsApkStudioProps> = ({
   }, []);
 
   const handleTestVoice = () => {
-    let testPhrase = "Hello! I am MAYA, your personal AI assistant. All neural systems are fully operational.";
+    let testPhrase = "Hello! I am AYRA, your personal AI assistant. All neural systems are fully operational.";
     if (settings.language === 'ur') {
-      testPhrase = "ہیلو! میں مایا ہوں، آپ کی ذاتی اے آئی اسسٹنٹ۔ میرے تمام سسٹمز فعال ہیں۔";
+      testPhrase = "ہیلو! میں آئرا ہوں، آپ کی ذاتی اے آئی اسسٹنٹ۔ میرے تمام سسٹمز فعال ہیں۔";
     } else if (settings.language === 'hi') {
-      testPhrase = "नमस्ते! मैं माया हूँ, आपकी पर्सनल एआई असिस्टेंट। सभी सिस्टम्स सक्रिय हैं।";
+      testPhrase = "नमस्ते! मैं आयरा हूँ, आपकी पर्सनल एआई असिस्टेंट। सभी सिस्टम्स सक्रिय हैं।";
     }
 
     VoiceService.speak(testPhrase, {
@@ -67,7 +67,7 @@ export const SettingsApkStudio: React.FC<SettingsApkStudioProps> = ({
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ai.maya.assistant">
 
-    <!-- Essential Permissions for MAYA AI Assistant -->
+    <!-- Essential Permissions for AYRA AI Assistant -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -208,7 +208,7 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
           </div>
           <div>
             <span className="text-[10px] font-hud text-cyan-400 uppercase tracking-widest">Configuration & Android Deployment</span>
-            <h3 className="text-base font-bold font-tech text-white">MAYA Settings & APK Studio</h3>
+            <h3 className="text-base font-bold font-tech text-white">AYRA Settings & APK Studio</h3>
           </div>
         </div>
 
@@ -287,7 +287,7 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="w-5 h-5 text-cyan-400" />
-                <h4 className="text-sm font-bold font-hud text-white">MAYA 3D Avatar Configuration</h4>
+                <h4 className="text-sm font-bold font-hud text-white">AYRA 3D Avatar Configuration</h4>
               </div>
               <p className="text-slate-300 leading-relaxed text-xs">
                 Fine-tune skeletal poses, camera framing, real-time phoneme lip-sync, and 3D rendering parameters.
@@ -340,7 +340,7 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
               <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-2">
                 <span className="font-hud font-bold text-cyan-300 text-xs block">Default Session Posture</span>
                 <p className="text-slate-400 text-[11px]">
-                  Choose whether MAYA starts seated at her workstation or standing on stage.
+                  Choose whether AYRA starts seated at her workstation or standing on stage.
                 </p>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
@@ -441,7 +441,7 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
               </span>
             </div>
             <p className="text-slate-300 leading-relaxed">
-              MAYA AI is pre-configured with a complete GitHub Actions workflow (<code className="text-cyan-300">.github/workflows/android-build.yml</code>). Every push to the <code className="text-cyan-300">main</code> branch or version tag (<code className="text-cyan-300">v*</code>) automatically compiles the debug APK and attaches it to GitHub releases.
+              AYRA AI is pre-configured with a complete GitHub Actions workflow (<code className="text-cyan-300">.github/workflows/android-release.yml</code>). Manual dispatch and version tags (<code className="text-cyan-300">v*</code>) compile the release APK and attach <code className="text-cyan-300">AYRA-AI.apk</code> directly to GitHub Releases.
             </p>
           </div>
 
@@ -453,7 +453,7 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
                   1. Push Project to GitHub
                 </span>
                 <button
-                  onClick={() => copyToClipboard('git init\ngit add .\ngit commit -m "feat: MAYA AI assistant with Android APK automation"\ngit branch -M main\ngit remote add origin https://github.com/YOUR_USERNAME/MAYA-AI.git\ngit push -u origin main', 'git_push')}
+                  onClick={() => copyToClipboard('git init\ngit add .\ngit commit -m "feat: AYRA AI assistant with Android APK release"\ngit branch -M main\ngit remote add origin https://github.com/YOUR_USERNAME/AYRA-AI.git\ngit push -u origin main', 'git_push')}
                   className="text-cyan-400 hover:text-white flex items-center gap-1 text-[11px]"
                 >
                   {copiedKey === 'git_push' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -463,9 +463,9 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
               <pre className="p-2 rounded bg-black/60 text-cyan-200 font-mono text-[10px] overflow-x-auto">
 {`git init
 git add .
-git commit -m "feat: MAYA AI assistant"
+git commit -m "feat: AYRA AI assistant"
 git branch -M main
-git remote add origin https://github.com/USER/MAYA-AI.git
+git remote add origin https://github.com/USER/AYRA-AI.git
 git push -u origin main`}
               </pre>
             </div>
@@ -478,8 +478,8 @@ git push -u origin main`}
                 <span className="text-[10px] font-mono text-emerald-400">Push to main</span>
               </div>
               <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
-                <li>Every commit to <code className="text-cyan-300">main</code> automatically compiles the APK and attaches it to the workflow artifacts.</li>
-                <li>Builds <code className="text-cyan-300">MAYA-AI.apk</code> and <code className="text-cyan-300">MAYA-AI-debug.apk</code> via Gradle 8.5 &amp; JDK 17.</li>
+                <li>Every commit to <code className="text-cyan-300">main</code> automatically compiles the APK and uploads it to workflow artifacts.</li>
+                <li>Builds <code className="text-cyan-300">AYRA-AI.apk</code> and <code className="text-cyan-300">AYRA-AI-debug.apk</code> via Gradle &amp; JDK 17.</li>
               </ul>
             </div>
 
@@ -501,20 +501,20 @@ git push -u origin main`}
                 <code className="block p-1.5 rounded bg-black/60 text-cyan-200 font-mono text-[10px]">
                   git tag v1.0.0 && git push origin v1.0.0
                 </code>
-                <p><strong>Option B (No Git CLI needed):</strong> In GitHub, go to <em>Actions</em> &gt; <em>MAYA AI Android Build &amp; Release</em> &gt; <em>Run workflow</em> &gt; click <strong>Run workflow</strong>.</p>
+                <p><strong>Option B (No Git CLI needed):</strong> In GitHub, go to <em>Actions</em> &gt; <em>AYRA AI Android Build &amp; Release</em> &gt; <em>Run workflow</em> &gt; click <strong>Run workflow</strong>.</p>
               </div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-hud font-bold text-cyan-300 text-xs">
-                  4. Download MAYA-AI.apk
+                  4. Download AYRA-AI.apk
                 </span>
                 <span className="text-[10px] font-mono text-cyan-400">Releases &amp; Artifacts</span>
               </div>
               <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
-                <li>Under <strong>Releases</strong> on your GitHub repo, click <strong>MAYA AI v1.0.0</strong> to download <code className="text-cyan-300">MAYA-AI.apk</code>.</li>
-                <li>Or go to <strong>Actions</strong> &gt; click the latest run &gt; scroll to <strong>Artifacts</strong> &gt; click <code className="text-cyan-300">MAYA-AI-debug-apk</code>.</li>
+                <li>Under <strong>Releases</strong> on your GitHub repo, click <strong>AYRA AI Release</strong> to download <code className="text-cyan-300">AYRA-AI.apk</code>.</li>
+                <li>Or go to <strong>Actions</strong> &gt; click the latest run &gt; scroll to <strong>Artifacts</strong> &gt; click <code className="text-cyan-300">AYRA-AI-apk</code>.</li>
                 <li><em>Tip:</em> Ensure GitHub repo <strong>Settings &gt; Actions &gt; General &gt; Workflow permissions</strong> is set to <strong>"Read and write permissions"</strong>.</li>
               </ul>
             </div>
@@ -800,7 +800,7 @@ jobs:
               <div>
                 <div className="text-xs font-hud text-white uppercase">Auto-Recite AI Responses</div>
                 <p className="text-[11px] text-slate-400 font-tech">
-                  MAYA automatically articulates spoken responses whenever a response finishes generating.
+                  AYRA automatically articulates spoken responses whenever a response finishes generating.
                 </p>
               </div>
               <button
@@ -821,10 +821,10 @@ jobs:
         <div className="space-y-4 animate-fadeIn text-xs font-tech">
           <div className="p-4 rounded-xl bg-gradient-to-r from-[#071330] to-[#0E1F4B] border border-cyan-500/30">
             <h4 className="text-sm font-bold font-hud text-white mb-1">
-              Building a Native Android Release APK for MAYA AI
+              Building a Native Android Release APK for AYRA AI
             </h4>
             <p className="text-slate-300 leading-relaxed">
-              MAYA AI is built mobile-first. Follow these standard instructions to export and package the application into a standalone Android APK using Capacitor and Android Studio.
+              AYRA AI is built mobile-first. The project contains a native Android wrapper (`/app`) and automated GitHub Actions workflow to export and package the application into a standalone Android APK.
             </p>
           </div>
 
@@ -832,10 +832,10 @@ jobs:
             <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-hud font-bold text-cyan-300 text-xs">
-                  Step 1: Install Capacitor Native Runtime
+                  Step 1: Build Web Assets for Android
                 </span>
                 <button
-                  onClick={() => copyToClipboard('npm install @capacitor/core @capacitor/cli @capacitor/android', 'step1')}
+                  onClick={() => copyToClipboard('npm run build', 'step1')}
                   className="text-cyan-400 hover:text-white flex items-center gap-1 text-[11px]"
                 >
                   {copiedKey === 'step1' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -843,17 +843,17 @@ jobs:
                 </button>
               </div>
               <pre className="p-2.5 rounded-lg bg-black/60 text-cyan-200 font-mono text-[11px] overflow-x-auto">
-                npm install @capacitor/core @capacitor/cli @capacitor/android
+                npm run build
               </pre>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#050B1B] border border-cyan-500/20">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-hud font-bold text-cyan-300 text-xs">
-                  Step 2: Initialize & Build Web Assets
+                  Step 2: Automated GitHub Release or Local Gradle
                 </span>
                 <button
-                  onClick={() => copyToClipboard('npx cap init "MAYA AI" "ai.maya.assistant" --web-dir dist\nnpm run build\nnpx cap add android', 'step2')}
+                  onClick={() => copyToClipboard('./gradlew assembleDebug', 'step2')}
                   className="text-cyan-400 hover:text-white flex items-center gap-1 text-[11px]"
                 >
                   {copiedKey === 'step2' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -861,9 +861,7 @@ jobs:
                 </button>
               </div>
               <pre className="p-2.5 rounded-lg bg-black/60 text-cyan-200 font-mono text-[11px] overflow-x-auto">
-                {`npx cap init "MAYA AI" "ai.maya.assistant" --web-dir dist
-npm run build
-npx cap add android`}
+                ./gradlew assembleDebug
               </pre>
             </div>
 
@@ -873,7 +871,7 @@ npx cap add android`}
                   Step 3: Open in Android Studio & Compile Release APK
                 </span>
                 <button
-                  onClick={() => copyToClipboard('npx cap open android', 'step3')}
+                  onClick={() => copyToClipboard('./gradlew assembleRelease', 'step3')}
                   className="text-cyan-400 hover:text-white flex items-center gap-1 text-[11px]"
                 >
                   {copiedKey === 'step3' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -881,13 +879,13 @@ npx cap add android`}
                 </button>
               </div>
               <pre className="p-2.5 rounded-lg bg-black/60 text-cyan-200 font-mono text-[11px] overflow-x-auto mb-2">
-                npx cap open android
+                ./gradlew assembleRelease
               </pre>
               <ol className="list-decimal list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
-                <li>In Android Studio, let Gradle sync complete.</li>
-                <li>Verify permissions in <code className="text-cyan-300">android/app/src/main/AndroidManifest.xml</code>.</li>
+                <li>In Android Studio, open the root directory. Let Gradle sync complete.</li>
+                <li>Verify permissions in <code className="text-cyan-300">app/src/main/AndroidManifest.xml</code>.</li>
                 <li>Go to <strong>Build &gt; Build Bundle(s) / APK(s) &gt; Build APK(s)</strong>.</li>
-                <li>The release or debug APK will be generated in <code className="text-cyan-300">android/app/build/outputs/apk/debug/app-debug.apk</code>.</li>
+                <li>The release or debug APK will be generated in <code className="text-cyan-300">app/build/outputs/apk/debug/AYRA-AI-debug.apk</code>.</li>
               </ol>
             </div>
 
@@ -896,9 +894,9 @@ npx cap add android`}
                 Step 4: Install on Android Phone
               </span>
               <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] leading-relaxed">
-                <li>Transfer the <code className="text-cyan-300">.apk</code> file to your Android phone via USB, Google Drive, or WhatsApp.</li>
+                <li>Transfer the <code className="text-cyan-300">AYRA-AI.apk</code> file to your Android phone via USB, Google Drive, or WhatsApp.</li>
                 <li>Enable <em>"Install unknown apps"</em> in Android Settings for your file manager.</li>
-                <li>Tap the APK to install. MAYA AI will appear on your home screen with high-tech hologram launcher icon!</li>
+                <li>Tap the APK to install. AYRA AI will appear on your home screen with high-tech hologram launcher icon!</li>
               </ul>
             </div>
           </div>
@@ -910,7 +908,7 @@ npx cap add android`}
         <div className="space-y-3 animate-fadeIn">
           <div className="flex items-center justify-between">
             <span className="text-xs font-hud text-cyan-300 uppercase">
-              android/app/src/main/AndroidManifest.xml
+              app/src/main/AndroidManifest.xml
             </span>
             <button
               onClick={() => copyToClipboard(ANDROID_MANIFEST_XML, 'manifest')}
@@ -931,7 +929,7 @@ npx cap add android`}
         <div className="space-y-3 animate-fadeIn">
           <div className="flex items-center justify-between">
             <span className="text-xs font-hud text-cyan-300 uppercase">
-              android/app/src/main/java/ai/maya/assistant/MainActivity.kt
+              app/src/main/java/ai/maya/assistant/MainActivity.kt
             </span>
             <button
               onClick={() => copyToClipboard(MAIN_ACTIVITY_KOTLIN, 'kotlin')}
@@ -951,13 +949,13 @@ npx cap add android`}
       {activeTab === 'architecture' && (
         <div className="space-y-4 animate-fadeIn text-xs font-tech">
           <div className="p-4 rounded-xl bg-[#050B1B] border border-cyan-500/20">
-            <h4 className="font-hud font-bold text-white text-sm mb-2">MAYA AI Full-Stack Architecture</h4>
+            <h4 className="font-hud font-bold text-white text-sm mb-2">AYRA AI Full-Stack Architecture</h4>
             <div className="space-y-2 text-slate-300 leading-relaxed">
               <p>
-                <strong>Frontend:</strong> React 19 + TypeScript + Vite + Tailwind CSS with hardware-accelerated animations, custom holographic SVG vector avatar with 7 emotional expressions, Web Speech API (Speech Recognition + Speech Synthesis), Web Audio chimes, and Canvas 60fps audio waveform.
+                <strong>Frontend:</strong> React 19 + TypeScript + Vite + Tailwind CSS with hardware-accelerated animations, photorealistic extracted 3D rigged avatar with 7 emotional expressions, Web Speech API (Speech Recognition + Speech Synthesis), Web Audio chimes, and Canvas 60fps audio waveform.
               </p>
               <p>
-                <strong>Backend Service:</strong> Express.js server (`server.ts`) powering secure Google Gemini AI (`@google/genai` model `gemini-3.8-flash`) endpoints for conversational chat with emotion classification, multilingual translation (English, Urdu, Hindi), document summarization, and Android intent detection.
+                <strong>Backend Service:</strong> Express.js server (`server.ts`) powering secure Google Gemini AI (`@google/genai` model `gemini-3.8-flash` and `gemini-3.8-flash-lite-tts`) endpoints for conversational chat with emotion classification, multilingual translation (English, Urdu, Hindi), document summarization, and Android intent detection.
               </p>
               <p>
                 <strong>Mobile Subsystems:</strong> Native intent filters (`tel:`, `sms:`, `intent://`, `geo:`, `vnd.youtube:`, `wa.me`), vibration haptics, battery status API, Notification API, and confirmation protocol for all sensitive actions.
@@ -970,7 +968,7 @@ npx cap add android`}
               Project File Hierarchy
             </span>
             <pre className="p-2.5 rounded-lg bg-black/60 text-cyan-300 font-mono text-[10px] overflow-x-auto">
-{`MAYA-AI/
+{`AYRA-AI/
 ├── server.ts                       # Full-stack Express + Gemini API backend
 ├── src/
 │   ├── App.tsx                     # Main cockpit & state coordinator
@@ -979,8 +977,10 @@ npx cap add android`}
 │   │   ├── voiceService.ts         # STT, TTS, Web Audio Synthesizer, Wake Word
 │   │   └── androidIntents.ts       # Native intents (tel, sms, apps, haptics)
 │   ├── components/
-│   │   ├── Avatar/MayaAvatar.tsx   # Holographic female avatar (7 emotions)
-│   │   ├── Voice/VoiceWaveform.tsx # Canvas 60fps audio waveform visualizer
+│   │   ├── Avatar/AyraRiggedAvatar # 3D Photorealistic Rigged Avatar
+│   │   ├── Voice/                  # Voice HUD, Live Voice Duplex mode
+│   │   ├── Browser/                # Built-in multi-tab neural web browser
+│   │   ├── Vision/                 # Camera OCR & Grounded web search
 │   │   ├── Android/                # Action confirmation modal & intent center
 │   │   ├── Tools/                  # Weather, Calculator, Summarizer, Translator
 │   │   ├── Memory/                 # Encrypted client memory & notes manager

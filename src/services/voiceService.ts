@@ -88,7 +88,7 @@ export class VoiceService {
   }
 
   /**
-   * Find the most pleasing female voice for MAYA
+   * Find the most pleasing female voice for AYRA
    */
   static selectBestFemaleVoice(language: string = 'en'): SpeechSynthesisVoice | null {
     if (!this.synth) return null;
@@ -122,10 +122,13 @@ export class VoiceService {
     return enVoice || voices[0] || null;
   }
 
+  private static activeAudio: HTMLAudioElement | null = null;
+
   /**
-   * Speak text with Text-to-Speech
+   * Speak text with Gemini 3.8 Flash Lite TTS natural female voice ('Kore'),
+   * falling back smoothly to Web Speech API when offline or unavailable.
    */
-  static speak(
+  static async speak(
     text: string,
     options: {
       rate?: number;
@@ -133,17 +136,13 @@ export class VoiceService {
       volume?: number;
       voiceURI?: string;
       language?: string;
+      preferServerTts?: boolean;
       onStart?: () => void;
       onEnd?: () => void;
       onError?: (err: any) => void;
     } = {}
-  ): void {
-    if (!this.synth) {
-      options.onError?.('Speech synthesis unsupported');
-      return;
-    }
-
-    // Stop ongoing speech
+  ): Promise<void> {
+    // Stop any ongoing speech immediately
     this.stopSpeaking();
 
     // Clean text from markdown or code blocks for clean pronunciation
@@ -159,9 +158,82 @@ export class VoiceService {
       return;
     }
 
+    // Try server-side Gemini 3.8 natural female voice first if enabled (default true)
+    if (options.preferServerTts !== false) {
+      try {
+        const res = await fetch('/api/gemini/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: cleanText,
+            voice: 'Kore', // Warm, high-fidelity female persona
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.audio && data.mimeType) {
+            const audioUrl = `data:${data.mimeType};base64,${data.audio}`;
+            const audio = new Audio(audioUrl);
+            audio.playbackRate = options.rate ?? 1.0;
+            audio.volume = options.volume ?? 1.0;
+            this.activeAudio = audio;
+
+            audio.onplay = () => {
+              this.isSpeaking = true;
+              options.onStart?.();
+            };
+
+            audio.onended = () => {
+              this.isSpeaking = false;
+              this.activeAudio = null;
+              options.onEnd?.();
+            };
+
+            audio.onerror = (e) => {
+              this.isSpeaking = false;
+              this.activeAudio = null;
+              // Fallback to browser Web Speech API
+              this.speakBrowserSynthesis(cleanText, options);
+            };
+
+            await audio.play();
+            return;
+          }
+        }
+      } catch (serverErr) {
+        // Fall back to client synthesizer
+      }
+    }
+
+    // Client-side Web Speech API Fallback
+    this.speakBrowserSynthesis(cleanText, options);
+  }
+
+  /**
+   * Client-side Web Speech API fallback
+   */
+  private static speakBrowserSynthesis(
+    cleanText: string,
+    options: {
+      rate?: number;
+      pitch?: number;
+      volume?: number;
+      voiceURI?: string;
+      language?: string;
+      onStart?: () => void;
+      onEnd?: () => void;
+      onError?: (err: any) => void;
+    }
+  ): void {
+    if (!this.synth) {
+      options.onError?.('Speech synthesis unsupported');
+      return;
+    }
+
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = options.rate ?? 1.05;
-    utterance.pitch = options.pitch ?? 1.1; // Slightly higher pitch for female assistant persona
+    utterance.pitch = options.pitch ?? 1.15; // Slightly higher pitch for female assistant persona
     utterance.volume = options.volume ?? 1.0;
 
     const voices = this.synth.getVoices();
@@ -206,20 +278,31 @@ export class VoiceService {
   }
 
   /**
-   * Stop all ongoing speech
+   * Stop all ongoing speech immediately (Server audio or Web Speech)
    */
   static stopSpeaking(): void {
-    if (this.synth) {
-      this.synth.cancel();
-      this.isSpeaking = false;
+    if (this.activeAudio) {
+      try {
+        this.activeAudio.pause();
+        this.activeAudio.currentTime = 0;
+      } catch {}
+      this.activeAudio = null;
     }
+    if (this.synth) {
+      try {
+        this.synth.cancel();
+      } catch {}
+    }
+    this.isSpeaking = false;
   }
 
   /**
    * Check if speech is currently active
    */
   static getSpeakingStatus(): boolean {
-    return this.synth ? (this.synth.speaking || this.isSpeaking) : false;
+    const isAudioPlaying = Boolean(this.activeAudio && !this.activeAudio.paused);
+    const isSynthSpeaking = Boolean(this.synth && this.synth.speaking);
+    return isAudioPlaying || isSynthSpeaking || this.isSpeaking;
   }
 
   /**
@@ -280,8 +363,16 @@ export class VoiceService {
 
         // Check wake word if enabled
         if (options.wakeWordMode) {
-          const targetWake = (options.wakeWord || 'maya').toLowerCase();
-          if (currentText.toLowerCase().includes(targetWake) || currentText.toLowerCase().includes('hey maya')) {
+          const targetWake = (options.wakeWord || 'ayra').toLowerCase();
+          const lower = currentText.toLowerCase();
+          if (
+            lower.includes(targetWake) ||
+            lower.includes('hey ayra') ||
+            lower.includes('ayra') ||
+            lower.includes('آئرا') ||
+            lower.includes('hey maya') ||
+            lower.includes('maya')
+          ) {
             this.playHologramTone('activate');
             handlers.onWakeWord?.();
           }

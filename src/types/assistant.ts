@@ -99,3 +99,38 @@ export interface LiveSearchResult {
   verified: boolean;
   timestamp: string;
 }
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: ChatMessage[];
+  systemInstruction?: string;
+}
+
+export interface BrowserTab {
+  id: string;
+  title: string;
+  url: string;
+  isLoading: boolean;
+  canGoBack: boolean;
+  canGoForward: boolean;
+  history: string[];
+  historyIndex: number;
+}
+
+export interface BrowserBookmark {
+  id: string;
+  title: string;
+  url: string;
+  createdAt: string;
+  category?: string;
+}
+
+export interface BrowserHistoryItem {
+  id: string;
+  title: string;
+  url: string;
+  visitedAt: string;
+}

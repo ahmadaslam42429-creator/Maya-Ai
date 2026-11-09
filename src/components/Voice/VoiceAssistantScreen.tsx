@@ -17,6 +17,7 @@ interface VoiceAssistantScreenProps {
   onLanguageChange: (lang: LanguageCode) => void;
   onQuickCommand: (command: string) => void;
   onSwitchToChat: () => void;
+  onStartLiveMode?: () => void;
 }
 
 export const VoiceAssistantScreen: React.FC<VoiceAssistantScreenProps> = ({
@@ -31,6 +32,7 @@ export const VoiceAssistantScreen: React.FC<VoiceAssistantScreenProps> = ({
   onLanguageChange,
   onQuickCommand,
   onSwitchToChat,
+  onStartLiveMode,
 }) => {
   const quickChips = [
     { text: 'How are you today?', label: 'General Check' },
@@ -50,12 +52,21 @@ export const VoiceAssistantScreen: React.FC<VoiceAssistantScreenProps> = ({
           <span>FREQ: 142.85 MHz • AUDIO BUFFER ACTIVE</span>
         </div>
         <div className="flex items-center gap-2">
+          {onStartLiveMode && (
+            <button
+              onClick={onStartLiveMode}
+              className="px-2 py-0.5 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-[9px] font-hud tracking-wider flex items-center gap-1 shadow-sm shadow-purple-500/30 hover:brightness-110 active:scale-95 transition-all"
+            >
+              <Sparkles className="w-2.5 h-2.5" />
+              <span>LIVE VOICE</span>
+            </button>
+          )}
           <span>NEURAL STATUS: OPTIMAL</span>
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
         </div>
       </div>
 
-      {/* Center 3D Realistic Maya Avatar */}
+      {/* Center 3D Realistic Avatar */}
       <div className="w-full my-2 flex flex-col items-center justify-center">
         <RealisticMayaAvatar
           emotion={emotion}
@@ -82,13 +93,13 @@ export const VoiceAssistantScreen: React.FC<VoiceAssistantScreenProps> = ({
             </div>
           ) : isSpeaking ? (
             <div className="text-xs sm:text-sm font-tech text-purple-200 leading-snug">
-              <span className="text-[10px] font-hud uppercase text-purple-400 block mb-0.5">MAYA Articulating:</span>
+              <span className="text-[10px] font-hud uppercase text-purple-400 block mb-0.5">AYRA Articulating:</span>
               <p className="line-clamp-2">{lastReply || 'Synthesizing voice response...'}</p>
             </div>
           ) : (
             <div className="text-xs font-tech text-slate-400">
               <span className="text-[10px] font-hud text-cyan-400 uppercase tracking-widest block mb-0.5">Audio Standby</span>
-              Tap the holographic microphone or say "Hey Maya" to initiate speech.
+              Tap microphone or click Live Voice Mode for continuous conversation.
             </div>
           )}
         </div>
@@ -113,18 +124,28 @@ export const VoiceAssistantScreen: React.FC<VoiceAssistantScreenProps> = ({
                 ? 'bg-red-500 text-white animate-pulse shadow-red-500/50 ring-4 ring-red-400/30'
                 : 'bg-gradient-to-r from-cyan-400 to-blue-600 text-slate-950 hover:from-cyan-300 hover:to-blue-500 shadow-cyan-500/40 hover:shadow-cyan-400/60 ring-4 ring-cyan-500/20'
             }`}
-            title={isListening ? 'Stop Listening' : 'Speak to MAYA'}
+            title={isListening ? 'Stop Listening' : 'Speak to AYRA'}
           >
             {isListening ? <MicOff className="w-8 h-8" /> : <Mic className="w-8 h-8" />}
           </button>
 
-          <button
-            onClick={onSwitchToChat}
-            className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-cyan-950 border border-cyan-500/30 text-cyan-300 font-tech font-bold text-xs flex items-center gap-2 shadow-lg transition-all"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>Chat View</span>
-          </button>
+          {onStartLiveMode ? (
+            <button
+              onClick={onStartLiveMode}
+              className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-900/80 to-pink-950/80 hover:from-purple-800 hover:to-pink-900 border border-purple-500/50 text-purple-200 font-tech font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-950/40 transition-all"
+            >
+              <Sparkles className="w-4 h-4 text-pink-400" />
+              <span>Live Mode</span>
+            </button>
+          ) : (
+            <button
+              onClick={onSwitchToChat}
+              className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-cyan-950 border border-cyan-500/30 text-cyan-300 font-tech font-bold text-xs flex items-center gap-2 shadow-lg transition-all"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Chat View</span>
+            </button>
+          )}
         </div>
 
         {/* Quick Voice Prompt Chips */}

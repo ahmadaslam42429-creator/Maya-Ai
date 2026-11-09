@@ -36,7 +36,7 @@ export const MemoryNotesManager: React.FC<{
       {
         id: 'mem-3',
         title: 'Project Focus',
-        content: 'Developing MAYA AI personal assistant Android ecosystem with Gemini.',
+        content: 'Developing AYRA AI personal assistant Android ecosystem with Gemini.',
         category: 'work',
         createdAt: '2026-11-08 14:15',
         isFavorite: false,
@@ -47,13 +47,13 @@ export const MemoryNotesManager: React.FC<{
   // User notes state
   const [notes, setNotes] = useState<UserNote[]>(() => {
     try {
-      const saved = localStorage.getItem('maya_user_notes');
+      const saved = localStorage.getItem('ayra_user_notes') || localStorage.getItem('maya_user_notes');
       if (saved) return JSON.parse(saved);
     } catch {}
     return [
       {
         id: 'note-1',
-        title: 'MAYA Android Architecture',
+        title: 'AYRA Android Architecture',
         content: 'Remember to verify Android Intent Filter for tel: and speech recognition audio focus before building APK in Android Studio.',
         tags: ['Android', 'Architecture', 'Gemini'],
         createdAt: '2026-11-08 11:20',
@@ -137,7 +137,7 @@ export const MemoryNotesManager: React.FC<{
   const handleExportBackup = () => {
     const data = {
       exportedAt: new Date().toISOString(),
-      assistant: 'MAYA AI',
+      assistant: 'AYRA AI',
       memories,
       notes,
     };

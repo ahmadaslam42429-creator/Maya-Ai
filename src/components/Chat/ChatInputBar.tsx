@@ -94,10 +94,10 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
           disabled={disabled}
           placeholder={
             activeLanguage === 'ur'
-              ? 'مایا سے کچھ بھی پوچھیں، یا مائیک دبائیں...'
+              ? 'آئرا سے کچھ بھی پوچھیں، یا مائیک دبائیں...'
               : activeLanguage === 'hi'
-              ? 'माया से कुछ भी पूछें, या माइक दबाएं...'
-              : 'Transmit command to MAYA AI, or tap microphone...'
+              ? 'आयरा से कुछ भी पूछें, या माइक दबाएं...'
+              : 'Transmit command to AYRA AI, or tap microphone...'
           }
           className={`flex-1 bg-transparent px-2 text-sm text-white placeholder-slate-500 outline-none ${
             activeLanguage === 'ur' ? 'font-urdu text-right text-base' : 'font-tech'

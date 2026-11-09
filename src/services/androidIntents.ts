@@ -17,11 +17,23 @@ export interface DeviceTelemetry {
 
 export class AndroidIntentService {
   /**
-   * Safe phone call execution via standard tel: intent
+   * Safe phone call execution via native bridge or tel: intent
    */
   static dialNumber(phoneNumber: string): boolean {
     const cleanNumber = phoneNumber.replace(/[^0-9+*#]/g, '');
     if (!cleanNumber) return false;
+
+    // Check Android native bridge
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.dialPhone === 'function') {
+      try {
+        nativeBridge.dialPhone(cleanNumber);
+        return true;
+      } catch (err) {
+        console.warn('Native bridge dial error:', err);
+      }
+    }
+
     window.location.href = `tel:${cleanNumber}`;
     return true;
   }
@@ -65,10 +77,43 @@ export class AndroidIntentService {
   }
 
   /**
-   * App launch using Android deep link schemes
+   * App launch using Android Native Bridge or deep link schemes
    */
   static openApplication(appName: string, queryOrTarget: string = ''): void {
     const name = appName.toLowerCase().trim();
+    
+    // Check Android native bridge
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.launchApp === 'function') {
+      try {
+        const packageMap: Record<string, string> = {
+          'whatsapp': 'com.whatsapp',
+          'youtube': 'com.google.android.youtube',
+          'maps': 'com.google.android.apps.maps',
+          'google maps': 'com.google.android.apps.maps',
+          'camera': 'android.media.action.IMAGE_CAPTURE',
+          'chrome': 'com.android.chrome',
+          'browser': 'com.android.chrome',
+          'settings': 'android.settings.SETTINGS',
+          'clock': 'com.google.android.deskclock',
+          'alarm': 'com.google.android.deskclock',
+          'instagram': 'com.instagram.android',
+          'facebook': 'com.facebook.katana',
+          'tiktok': 'com.zhiliaoapp.musically',
+          'calendar': 'com.google.android.calendar',
+          'gallery': 'com.google.android.apps.photos',
+          'messages': 'com.google.android.apps.messaging',
+          'phone': 'com.google.android.dialer',
+        };
+
+        if (packageMap[name]) {
+          const launched = nativeBridge.launchApp(packageMap[name]);
+          if (launched) return;
+        }
+      } catch (err) {
+        console.warn('Native bridge launch error:', err);
+      }
+    }
     
     switch (name) {
       case 'whatsapp':
@@ -97,12 +142,10 @@ export class AndroidIntentService {
         break;
 
       case 'camera':
-        // Android intent for camera capture
         window.location.href = 'intent:#Intent;action=android.media.action.IMAGE_CAPTURE;end';
         break;
 
       case 'settings':
-        // Android settings intent
         window.location.href = 'intent:#Intent;action=android.settings.SETTINGS;end';
         break;
 
@@ -116,11 +159,65 @@ export class AndroidIntentService {
         window.location.href = 'market://';
         break;
 
+      case 'instagram':
+        window.location.href = 'intent://instagram.com/#Intent;package=com.instagram.android;scheme=https;end';
+        break;
+
+      case 'facebook':
+        window.location.href = 'intent://facebook.com/#Intent;package=com.facebook.katana;scheme=https;end';
+        break;
+
       default:
         // Generic fallback to web search or app query
         window.location.href = `https://www.google.com/search?q=${encodeURIComponent(appName + ' app')}`;
         break;
     }
+  }
+
+  /**
+   * Set Android alarm or timer
+   */
+  static setAlarm(hour: number, minutes: number, message: string = 'AYRA Wakeup'): boolean {
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.setAlarm === 'function') {
+      try {
+        nativeBridge.setAlarm(hour, minutes, message);
+        return true;
+      } catch (err) {
+        console.warn('Native alarm set error:', err);
+      }
+    }
+    // Web intent fallback
+    window.location.href = `intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR=${hour};i.android.intent.extra.alarm.MINUTES=${minutes};s.android.intent.extra.alarm.MESSAGE=${encodeURIComponent(message)};B.android.intent.extra.alarm.SKIP_UI=false;end`;
+    return true;
+  }
+
+  /**
+   * Open Android system settings category
+   */
+  static openSystemSetting(settingType: 'wifi' | 'bluetooth' | 'display' | 'sound' | 'location' | 'battery' | 'general'): void {
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.openSystemSettings === 'function') {
+      try {
+        nativeBridge.openSystemSettings(settingType);
+        return;
+      } catch (err) {
+        console.warn('Native settings error:', err);
+      }
+    }
+
+    const actionMap: Record<string, string> = {
+      wifi: 'android.settings.WIFI_SETTINGS',
+      bluetooth: 'android.settings.BLUETOOTH_SETTINGS',
+      display: 'android.settings.DISPLAY_SETTINGS',
+      sound: 'android.settings.SOUND_SETTINGS',
+      location: 'android.settings.LOCATION_SOURCE_SETTINGS',
+      battery: 'android.intent.action.POWER_USAGE_SUMMARY',
+      general: 'android.settings.SETTINGS',
+    };
+
+    const action = actionMap[settingType] || 'android.settings.SETTINGS';
+    window.location.href = `intent:#Intent;action=${action};end`;
   }
 
   /**

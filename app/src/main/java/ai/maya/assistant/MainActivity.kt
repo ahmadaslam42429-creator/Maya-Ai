@@ -24,6 +24,8 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
+import android.webkit.JavascriptInterface
 import androidx.core.content.ContextCompat
 import androidx.webkit.WebViewAssetLoader
 
@@ -127,6 +129,9 @@ class MainActivity : AppCompatActivity() {
         if (0 != (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE)) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
+
+        // Bridge native Android APIs to AYRA Assistant UI
+        webView.addJavascriptInterface(AndroidBridge(this), "AyraNativeBridge")
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onPermissionRequest(request: PermissionRequest) {
@@ -234,6 +239,86 @@ class MainActivity : AppCompatActivity() {
         // Eliminates null origin restrictions, allows ES modules and secure Web APIs
         val appUrl = "https://appassets.androidplatform.net/assets/index.html"
         webView.loadUrl(appUrl)
+    }
+
+    /**
+     * Native Android Bridge exposed to AYRA Assistant WebView
+     */
+    inner class AndroidBridge(private val context: Context) {
+        @JavascriptInterface
+        fun launchApp(packageName: String): Boolean {
+            return try {
+                val intent = packageManager.getLaunchIntentForPackage(packageName)
+                if (intent != null) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                    true
+                } else {
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e("AYRA_AI", "Error launching app: ${e.message}")
+                false
+            }
+        }
+
+        @JavascriptInterface
+        fun dialPhone(phoneNumber: String) {
+            try {
+                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e("AYRA_AI", "Error dialing phone: ${e.message}")
+            }
+        }
+
+        @JavascriptInterface
+        fun setAlarm(hour: Int, minutes: Int, message: String) {
+            try {
+                val intent = Intent(android.provider.AlarmClock.ACTION_SET_ALARM).apply {
+                    putExtra(android.provider.AlarmClock.EXTRA_HOUR, hour)
+                    putExtra(android.provider.AlarmClock.EXTRA_MINUTES, minutes)
+                    putExtra(android.provider.AlarmClock.EXTRA_MESSAGE, message)
+                    putExtra(android.provider.AlarmClock.EXTRA_SKIP_UI, false)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e("AYRA_AI", "Error setting alarm: ${e.message}")
+            }
+        }
+
+        @JavascriptInterface
+        fun openSystemSettings(type: String) {
+            try {
+                val action = when (type.lowercase()) {
+                    "wifi" -> android.provider.Settings.ACTION_WIFI_SETTINGS
+                    "bluetooth" -> android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
+                    "display" -> android.provider.Settings.ACTION_DISPLAY_SETTINGS
+                    "sound" -> android.provider.Settings.ACTION_SOUND_SETTINGS
+                    "location" -> android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
+                    "battery" -> Intent.ACTION_POWER_USAGE_SUMMARY
+                    else -> android.provider.Settings.ACTION_SETTINGS
+                }
+                val intent = Intent(action).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e("AYRA_AI", "Error opening settings: ${e.message}")
+            }
+        }
+
+        @JavascriptInterface
+        fun vibrateDevice(durationMs: Long) {
+            try {
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+                vibrator?.vibrate(durationMs)
+            } catch (e: Exception) {
+                Log.e("AYRA_AI", "Error vibrating: ${e.message}")
+            }
+        }
     }
 
     override fun onDestroy() {
