@@ -20,6 +20,7 @@ import { MemoryNotesManager } from './components/Memory/MemoryNotesManager';
 import { SettingsApkStudio } from './components/Settings/SettingsApkStudio';
 import { VoiceService } from './services/voiceService';
 import { AndroidIntentService } from './services/androidIntents';
+import { processLocalBrainMessage } from './services/localAiBrain';
 import { 
   Mic, 
   MessageSquare, 
@@ -208,16 +209,45 @@ export default function App() {
         }
       }
     } catch (err) {
-      console.error(err);
-      setEmotion('confused');
-      const errorMsg: ChatMessage = {
+      console.warn('Backend unavailable, executing on-device quantum fallback engine:', err);
+      const localResult = processLocalBrainMessage(text, voiceSettings.language);
+
+      setEmotion(localResult.emotion);
+      setLastReply(localResult.reply);
+
+      const assistantMsg: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
         role: 'assistant',
-        text: "I encountered a synchronization pause with my neural cloud. Verifying connectivity...",
-        emotion: 'confused',
+        text: localResult.reply,
+        emotion: localResult.emotion,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        language: localResult.detectedLanguage,
+        action: localResult.action,
       };
-      setMessages((prev) => [...prev, errorMsg]);
+
+      setMessages((prev) => [...prev, assistantMsg]);
+
+      if (voiceSettings.autoSpeak) {
+        setIsSpeaking(true);
+        VoiceService.speak(localResult.reply, {
+          rate: voiceSettings.rate,
+          pitch: voiceSettings.pitch,
+          volume: voiceSettings.volume,
+          voiceURI: voiceSettings.voiceURI,
+          language: localResult.detectedLanguage,
+          onStart: () => setIsSpeaking(true),
+          onEnd: () => setIsSpeaking(false),
+          onError: () => setIsSpeaking(false),
+        });
+      }
+
+      if (localResult.action) {
+        if (localResult.action.requiresConfirmation) {
+          setPendingAction(localResult.action);
+        } else {
+          executeAndroidAction(localResult.action);
+        }
+      }
     }
   };
 

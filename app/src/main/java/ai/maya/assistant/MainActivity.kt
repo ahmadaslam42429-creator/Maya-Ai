@@ -3,29 +3,34 @@ package ai.maya.assistant
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.View
+import android.util.Log
+import android.view.WindowManager
+import android.webkit.ConsoleMessage
 import android.webkit.PermissionRequest
-import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.webkit.WebViewAssetLoader
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
-    private var progressBar: ProgressBar? = null
+    private lateinit var assetLoader: WebViewAssetLoader
 
     // Multiple permissions launcher for Audio, Calls, Notifications
     private val requestPermissionsLauncher = registerForActivityResult(
@@ -41,9 +46,25 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Root layout with WebView
-        webView = WebView(this)
+        // Enable Hardware Acceleration for fluid 60 FPS sci-fi animations
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+        )
+        window.decorView.setBackgroundColor(Color.parseColor("#040814"))
+
+        // Root WebView with futuristic dark background to eliminate white flash
+        webView = WebView(this).apply {
+            setBackgroundColor(Color.parseColor("#040814"))
+        }
         setContentView(webView)
+
+        // Initialize WebViewAssetLoader for modern secure asset handling (ES Modules & CORS)
+        assetLoader = WebViewAssetLoader.Builder()
+            .setDomain("appassets.androidplatform.net")
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .addPathHandler("/res/", WebViewAssetLoader.ResourcesPathHandler(this))
+            .build()
 
         checkAppPermissions()
         setupWebView()
@@ -60,7 +81,6 @@ class MainActivity : AppCompatActivity() {
         })
 
         // Load MAYA AI Application
-        // In local standalone APK, loads from bundled assets or web host
         loadAssistantApp()
     }
 
@@ -92,11 +112,20 @@ class MainActivity : AppCompatActivity() {
             databaseEnabled = true
             allowFileAccess = true
             allowContentAccess = true
+            allowFileAccessFromFileURLs = true
+            allowUniversalAccessFromFileURLs = true
             mediaPlaybackRequiresUserGesture = false
             cacheMode = WebSettings.LOAD_DEFAULT
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             useWideViewPort = true
             loadWithOverviewMode = true
+            displayZoomControls = false
+            builtInZoomControls = false
+        }
+
+        // Enable Chrome DevTools inspect in debug builds (chrome://inspect)
+        if (0 != (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE)) {
+            WebView.setWebContentsDebuggingEnabled(true)
         }
 
         webView.webChromeClient = object : WebChromeClient() {
@@ -104,9 +133,64 @@ class MainActivity : AppCompatActivity() {
                 // Grant Web Speech API microphone permission to WebView
                 request.grant(request.resources)
             }
+
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                if (consoleMessage != null) {
+                    val tag = "MAYA_AI_JS"
+                    val msg = "${consoleMessage.message()} [${consoleMessage.sourceId()}:${consoleMessage.lineNumber()}]"
+                    when (consoleMessage.messageLevel()) {
+                        ConsoleMessage.MessageLevel.ERROR -> Log.e(tag, msg)
+                        ConsoleMessage.MessageLevel.WARNING -> Log.w(tag, msg)
+                        else -> Log.d(tag, msg)
+                    }
+                }
+                return true
+            }
         }
 
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): WebResourceResponse? {
+                val url = request?.url ?: return null
+                
+                // Let WebViewAssetLoader handle standard appassets requests
+                val intercepted = assetLoader.shouldInterceptRequest(url)
+                if (intercepted != null) {
+                    return intercepted
+                }
+
+                // Fallback direct asset resolver for any relative asset paths
+                val path = url.path ?: ""
+                if (path.contains("/assets/")) {
+                    val cleanPath = path.substringAfter("/assets/").removePrefix("/")
+                    val candidatePaths = listOf(
+                        "assets/$cleanPath",
+                        cleanPath,
+                        "public/$cleanPath"
+                    )
+                    for (cand in candidatePaths) {
+                        try {
+                            val stream = assets.open(cand)
+                            val mime = when {
+                                cand.endsWith(".js") -> "application/javascript"
+                                cand.endsWith(".css") -> "text/css"
+                                cand.endsWith(".html") -> "text/html"
+                                cand.endsWith(".json") -> "application/json"
+                                cand.endsWith(".png") -> "image/png"
+                                cand.endsWith(".svg") -> "image/svg+xml"
+                                cand.endsWith(".woff2") -> "font/woff2"
+                                cand.endsWith(".woff") -> "font/woff"
+                                else -> "application/octet-stream"
+                            }
+                            return WebResourceResponse(mime, "UTF-8", stream)
+                        } catch (_: Exception) {}
+                    }
+                }
+                return null
+            }
+
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString() ?: return false
 
@@ -131,21 +215,25 @@ class MainActivity : AppCompatActivity() {
                 }
                 return false
             }
+
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError?
+            ) {
+                super.onReceivedError(view, request, error)
+                if (request?.isForMainFrame == true) {
+                    Log.e("MAYA_AI", "Error loading main frame: ${error?.description} (code: ${error?.errorCode})")
+                }
+            }
         }
     }
 
     private fun loadAssistantApp() {
-        // Check for bundled index.html in assets or fallback to dev URL
-        try {
-            val assetList = assets.list("public")
-            if (assetList != null && assetList.contains("index.html")) {
-                webView.loadUrl("file:///android_asset/public/index.html")
-                return
-            }
-        } catch (_: Exception) {}
-
-        // Fallback to local asset root or online service
-        webView.loadUrl("file:///android_asset/index.html")
+        // Primary: Load through WebViewAssetLoader HTTPS virtual host
+        // Eliminates null origin restrictions, allows ES modules and secure Web APIs
+        val appUrl = "https://appassets.androidplatform.net/assets/index.html"
+        webView.loadUrl(appUrl)
     }
 
     override fun onDestroy() {
