@@ -25,6 +25,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
+import android.provider.Settings
 import android.webkit.JavascriptInterface
 import androidx.core.content.ContextCompat
 import androidx.webkit.WebViewAssetLoader
@@ -318,6 +319,58 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e("AYRA_AI", "Error vibrating: ${e.message}")
             }
+        }
+
+        @JavascriptInterface
+        fun isOverlayPermissionGranted(): Boolean {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Settings.canDrawOverlays(this@MainActivity)
+            } else {
+                true
+            }
+        }
+
+        @JavascriptInterface
+        fun requestOverlayPermission() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this@MainActivity)) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                ).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+            }
+        }
+
+        @JavascriptInterface
+        fun startFloatingOverlay(): Boolean {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this@MainActivity)) {
+                requestOverlayPermission()
+                false
+            } else {
+                AyraFloatingOverlayService.startService(this@MainActivity)
+                true
+            }
+        }
+
+        @JavascriptInterface
+        fun stopFloatingOverlay(): Boolean {
+            AyraFloatingOverlayService.stopService(this@MainActivity)
+            return true
+        }
+
+        @JavascriptInterface
+        fun isFloatingOverlayRunning(): Boolean {
+            return AyraFloatingOverlayService.isServiceRunning
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra("trigger_live_voice", false)) {
+            webView.evaluateJavascript("window.dispatchEvent(new CustomEvent('ayra-trigger-live-voice'));", null)
         }
     }
 

@@ -25,6 +25,12 @@
 - **Real-Time Transcripts**: Dynamic live transcription displaying user speech and AYRA's thoughts.
 - **Wake Word System**: Hands-free voice trigger ("Hey AYRA", "AYRA", "آئرا").
 
+### 3. 🫧 Floating Chat Head & Background Live Mode (Active Over Other Apps)
+- **True Multitasking Over Other Apps**: Chat and talk with AYRA live even when WhatsApp, YouTube, Chrome, or other apps are opened and AYRA's main app is minimized/closed.
+- **Draggable Holographic Bubble**: Touch-and-mouse draggable floating head that hovers above all other applications.
+- **Android System Alert Window**: Native Android foreground service (`AyraFloatingOverlayService`) powered by `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE_MICROPHONE`, and `FOREGROUND_SERVICE_MEDIA_PLAYBACK`.
+- **Built-in App Multitasking Simulator**: Directly test chatting over simulated WhatsApp chats, YouTube streams, and Android Home screens.
+
 ### 3. 👤 Photorealistic 3D Rigged Female Avatar
 - **Character Model**: Full-body futuristic female character with technology hoodie, headset, and smartwatch.
 - **Skeletal Pose Rigging**: Dynamic postures including `SIT`, `STAND`, `WAVE`, `TALK`, `THINK`, and `IDLE`.

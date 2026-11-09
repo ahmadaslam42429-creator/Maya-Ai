@@ -356,4 +356,66 @@ export class AndroidIntentService {
       notificationPermission: typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'unsupported',
     };
   }
+
+  /**
+   * Floating Assistant Overlay Bridge for Android (Draw Over Other Apps)
+   */
+  static isOverlayPermissionGranted(): boolean {
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.isOverlayPermissionGranted === 'function') {
+      try {
+        return Boolean(nativeBridge.isOverlayPermissionGranted());
+      } catch (err) {
+        console.warn('Overlay permission check error:', err);
+      }
+    }
+    return false;
+  }
+
+  static requestOverlayPermission(): void {
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.requestOverlayPermission === 'function') {
+      try {
+        nativeBridge.requestOverlayPermission();
+      } catch (err) {
+        console.warn('Request overlay permission error:', err);
+      }
+    }
+  }
+
+  static startFloatingAssistant(): boolean {
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.startFloatingOverlay === 'function') {
+      try {
+        return Boolean(nativeBridge.startFloatingOverlay());
+      } catch (err) {
+        console.warn('Start floating overlay error:', err);
+      }
+    }
+    return false;
+  }
+
+  static stopFloatingAssistant(): boolean {
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.stopFloatingOverlay === 'function') {
+      try {
+        return Boolean(nativeBridge.stopFloatingOverlay());
+      } catch (err) {
+        console.warn('Stop floating overlay error:', err);
+      }
+    }
+    return false;
+  }
+
+  static isFloatingAssistantRunning(): boolean {
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.isFloatingOverlayRunning === 'function') {
+      try {
+        return Boolean(nativeBridge.isFloatingOverlayRunning());
+      } catch (err) {
+        console.warn('Check floating overlay running error:', err);
+      }
+    }
+    return false;
+  }
 }

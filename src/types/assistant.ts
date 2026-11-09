@@ -134,3 +134,10 @@ export interface BrowserHistoryItem {
   url: string;
   visitedAt: string;
 }
+
+export interface FloatingAssistantSettings {
+  enabled: boolean;
+  alwaysListen: boolean;
+  transparency: number;
+}
+

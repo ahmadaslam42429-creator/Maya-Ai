@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { VoiceSettings, AvatarPose } from '../../types/assistant';
-import { Settings, Sliders, Volume2, Mic, Smartphone, Download, Copy, Check, FileCode, Shield, Layers, HelpCircle, Terminal, GitBranch, User, Sparkles, Eye } from 'lucide-react';
+import { Settings, Sliders, Volume2, Mic, Smartphone, Download, Copy, Check, FileCode, Shield, Layers, HelpCircle, Terminal, GitBranch, User, Sparkles, Eye, Radio } from 'lucide-react';
 import { VoiceService } from '../../services/voiceService';
 import { AndroidIntentService } from '../../services/androidIntents';
 import { RealisticMayaAvatar } from '../Avatar/RealisticMayaAvatar';
@@ -22,7 +22,7 @@ export const SettingsApkStudio: React.FC<SettingsApkStudioProps> = ({
   avatarPose = 'sit',
   onPoseChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<'avatar' | 'voice' | 'github_actions' | 'apk_guide' | 'manifest' | 'kotlin' | 'architecture'>('avatar');
+  const [activeTab, setActiveTab] = useState<'avatar' | 'voice' | 'overlay' | 'github_actions' | 'apk_guide' | 'manifest' | 'kotlin' | 'architecture'>('avatar');
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [selectedPose, setSelectedPose] = useState<AvatarPose>(avatarPose);
@@ -242,6 +242,15 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
             <span>Voice & Persona</span>
           </button>
           <button
+            onClick={() => setActiveTab('overlay')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-tech transition-all shrink-0 ${
+              activeTab === 'overlay' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Radio className="w-3.5 h-3.5" />
+            <span>Floating Overlay & Background Live</span>
+          </button>
+          <button
             onClick={() => setActiveTab('apk_guide')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-tech transition-all shrink-0 ${
               activeTab === 'apk_guide' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
@@ -418,6 +427,72 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
                     </button>
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Floating Overlay & Background Live Mode */}
+      {activeTab === 'overlay' && (
+        <div className="space-y-4 animate-fadeIn text-xs font-tech">
+          <div className="p-4 rounded-xl bg-gradient-to-r from-[#071330] to-[#0E1F4B] border border-cyan-500/40 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Radio className="w-5 h-5 text-cyan-400 animate-pulse" />
+                <h4 className="text-sm font-bold font-hud text-white">
+                  Floating Overlay & Background Live Assistant
+                </h4>
+              </div>
+              <p className="text-slate-300 leading-relaxed text-xs">
+                Enables AYRA to keep conversing and executing commands while other applications (WhatsApp, YouTube, Google Maps) are active on the screen.
+              </p>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-emerald-950 border border-emerald-400 text-emerald-300 font-hud text-[10px] font-bold shrink-0">
+              SYSTEM_ALERT_WINDOW
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Native Android Service Control */}
+            <div className="p-4 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-3">
+              <h5 className="font-hud font-bold text-cyan-300 text-xs">1. Native Android Overlay Bridge</h5>
+              <p className="text-slate-300 text-[11px] leading-relaxed">
+                On real Android hardware, Android requires the <strong>"Display over other apps"</strong> permission to show floating bubbles over third-party apps.
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <button
+                  onClick={() => {
+                    const started = AndroidIntentService.startFloatingAssistant();
+                    if (!started) AndroidIntentService.requestOverlayPermission();
+                  }}
+                  className="px-3 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-hud text-xs flex items-center gap-1.5 transition"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Start Android Floating Bubble</span>
+                </button>
+                <button
+                  onClick={() => AndroidIntentService.stopFloatingAssistant()}
+                  className="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs transition"
+                >
+                  Stop Service
+                </button>
+              </div>
+            </div>
+
+            {/* Architecture Explanation */}
+            <div className="p-4 rounded-xl bg-[#050B1B] border border-cyan-500/20 space-y-3">
+              <h5 className="font-hud font-bold text-cyan-300 text-xs">2. Multitasking & Foreground Audio</h5>
+              <div className="space-y-1.5 text-[11px] text-slate-300 leading-relaxed">
+                <p>
+                  • <strong>Floating Chat Head:</strong> Draggable circular holographic bubble on the screen with touch/mouse move support.
+                </p>
+                <p>
+                  • <strong>Duplex Live Mic:</strong> Continuous listening loop with barge-in voice interruption.
+                </p>
+                <p>
+                  • <strong>App Switcher Test:</strong> Use the &quot;Simulate Other App&quot; buttons inside the floating HUD to test WhatsApp, YouTube, and Chrome.
+                </p>
               </div>
             </div>
           </div>

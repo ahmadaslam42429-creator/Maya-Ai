@@ -20,6 +20,7 @@ import { MayaAvatar } from './components/Avatar/MayaAvatar';
 import { VoiceWaveform } from './components/Voice/VoiceWaveform';
 import { VoiceAssistantScreen } from './components/Voice/VoiceAssistantScreen';
 import { LiveVoiceSessionModal } from './components/Voice/LiveVoiceSessionModal';
+import { FloatingAssistantHead } from './components/Overlay/FloatingAssistantHead';
 import { ChatMessageList } from './components/Chat/ChatMessageList';
 import { ChatInputBar } from './components/Chat/ChatInputBar';
 import { ChatSessionsDrawer } from './components/Chat/ChatSessionsDrawer';
@@ -571,6 +572,19 @@ export default function App() {
         onCreateSession={handleCreateSession}
         onRenameSession={handleRenameSession}
         onDeleteSession={handleDeleteSession}
+      />
+
+      {/* Universal Floating Assistant & Background Live Voice Overlay (Active over other apps & screens) */}
+      <FloatingAssistantHead
+        activeLanguage={voiceSettings.language}
+        onLanguageChange={(l) => setVoiceSettings({ ...voiceSettings, language: l })}
+        onDispatchAction={(action) => {
+          if (action.requiresConfirmation) setPendingAction(action);
+          else executeAndroidAction(action);
+        }}
+        onOpenFullApp={(screen) => {
+          if (screen) setCurrentScreen(screen as any);
+        }}
       />
 
       {/* TOP SCI-FI COCKPIT HEADER */}
