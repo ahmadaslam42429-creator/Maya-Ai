@@ -1,0 +1,11 @@
+{
+  "name": "MAYA AI - Futuristic Personal Assistant",
+  "description": "Futuristic personal AI assistant inspired by JARVIS with real voice interaction, emotional avatar, mobile phone intents, and multi-language support (English, Urdu, Hindi).",
+  "requestFramePermissions": [
+    "microphone",
+    "notifications",
+    "clipboard-read",
+    "clipboard-write"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

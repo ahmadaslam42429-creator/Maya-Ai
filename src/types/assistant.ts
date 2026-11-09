@@ -1,0 +1,66 @@
+export type EmotionType = 
+  | 'happy' 
+  | 'thinking' 
+  | 'excited' 
+  | 'caring' 
+  | 'confused' 
+  | 'serious' 
+  | 'sad';
+
+export type LanguageCode = 'en' | 'ur' | 'hi' | 'auto';
+
+export interface AssistantAction {
+  type: 'call' | 'alarm' | 'reminder' | 'open_app' | 'open_url' | 'weather' | 'calculator' | 'note' | 'search' | 'share';
+  title: string;
+  description: string;
+  payload: Record<string, any>;
+  requiresConfirmation: boolean;
+  status?: 'pending' | 'executed' | 'cancelled';
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  text: string;
+  emotion?: EmotionType;
+  timestamp: string;
+  language?: string;
+  action?: AssistantAction | null;
+  audioPlayed?: boolean;
+}
+
+export interface MemoryItem {
+  id: string;
+  title: string;
+  content: string;
+  category: 'preference' | 'personal' | 'fact' | 'work' | 'general';
+  createdAt: string;
+  isFavorite?: boolean;
+}
+
+export interface UserNote {
+  id: string;
+  title: string;
+  content: string;
+  tags: string[];
+  createdAt: string;
+  color?: string;
+}
+
+export interface VoiceSettings {
+  rate: number;
+  pitch: number;
+  volume: number;
+  voiceURI: string;
+  wakeWordEnabled: boolean;
+  autoSpeak: boolean;
+  language: LanguageCode;
+}
+
+export interface ReminderItem {
+  id: string;
+  title: string;
+  time: string;
+  completed: boolean;
+  createdAt: string;
+}
