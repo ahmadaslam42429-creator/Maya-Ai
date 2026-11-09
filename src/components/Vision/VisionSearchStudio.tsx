@@ -1,5 +1,5 @@
 /**
- * MAYA AI — Vision & Live Grounded Search Studio
+ * AYRA AI — Vision & Live Grounded Search Studio
  * Optical Camera, Gallery OCR, Scene Analysis & Verified Web Search
  * @license Apache-2.0
  */

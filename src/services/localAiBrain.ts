@@ -1,5 +1,5 @@
 /**
- * MAYA AI — Client-Side Neural Fallback Engine
+ * AYRA AI — Client-Side Neural Fallback Engine
  * Ensures 100% offline & standalone Android APK conversational capability
  * @license Apache-2.0
  */
@@ -57,7 +57,7 @@ export function processLocalBrainMessage(
         type: 'alarm',
         title: 'System Alarm Intent',
         description: `Set system wake-up alarm for ${scheduledTime}`,
-        payload: { time: scheduledTime, label: 'MAYA Wakeup' },
+        payload: { time: scheduledTime, label: 'AYRA Wakeup' },
         requiresConfirmation: true,
       },
     };
@@ -225,7 +225,7 @@ export function processLocalBrainMessage(
     }
     if (text.includes('کون ہو') || text.includes('اپنا تعارف')) {
       return {
-        reply: 'میرا نام مایا ہے (MAYA - Modular Advanced Yield Assistant)۔ میں ایک جدید، ہوشیار اور دوستانہ اے آئی اسسٹنٹ ہوں جو جاروس (JARVIS) سے متاثر ہو کر بنائی گئی ہے۔ میں آپ کے فون کے کام، پڑھائی، اردو اور انگریزی ترجمہ اور عمومی معلومات میں مدد کرتی ہوں۔',
+        reply: 'میرا نام آئرا ہے (AYRA - Advanced Yield & Reasoning Assistant)۔ میں ایک جدید، ہوشیار اور دوستانہ اے آئی اسسٹنٹ ہوں جو جاروس (JARVIS) سے متاثر ہو کر بنائی گئی ہے۔ میں آپ کے فون کے کام، پڑھائی، اردو اور انگریزی ترجمہ اور عمومی معلومات میں مدد کرتی ہوں۔',
         emotion: 'excited',
         detectedLanguage: 'ur',
         action: null,
@@ -261,7 +261,7 @@ export function processLocalBrainMessage(
 
   if (lower.includes('who are you') || lower.includes('what are you') || lower.includes('introduce')) {
     return {
-      reply: `I am MAYA AI — Modular Advanced Yield Assistant. Inspired by JARVIS and designed with a friendly, high-tech persona. I possess speech recognition, audio synthesis, multi-language fluency (English, Urdu, Hindi), Android intent automation, and study synthesis capabilities.`,
+      reply: `I am AYRA AI — Advanced Yield & Reasoning Assistant. Inspired by JARVIS and designed with a friendly, high-tech persona. I possess speech recognition, audio synthesis, multi-language fluency (English, Urdu, Hindi), Android intent automation, and study synthesis capabilities.`,
       emotion: 'excited',
       detectedLanguage: 'en',
       action: null,

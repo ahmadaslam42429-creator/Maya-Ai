@@ -1,5 +1,5 @@
 /**
- * Android Intent & Hardware Integration Service for MAYA AI
+ * Android Intent & Hardware Integration Service for AYRA AI
  * Handles native URL schemes, intents, permissions, and browser/webview hardware APIs.
  */
 
@@ -158,7 +158,7 @@ export class AndroidIntentService {
     }
 
     if (Notification.permission === 'granted') {
-      new Notification(`MAYA: ${title}`, {
+      new Notification(`AYRA: ${title}`, {
         body,
         icon: iconUrl || '/favicon.ico',
         badge: '/favicon.ico',
@@ -167,7 +167,7 @@ export class AndroidIntentService {
     } else if (Notification.permission !== 'denied') {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        new Notification(`MAYA: ${title}`, {
+        new Notification(`AYRA: ${title}`, {
           body,
           icon: iconUrl || '/favicon.ico',
         });

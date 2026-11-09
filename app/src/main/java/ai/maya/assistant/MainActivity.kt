@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     ) { permissions ->
         val micGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
         if (micGranted) {
-            Toast.makeText(this, "MAYA Voice Systems Ready", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "AYRA Voice Systems Ready", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
                 if (consoleMessage != null) {
-                    val tag = "MAYA_AI_JS"
+                    val tag = "AYRA_AI_JS"
                     val msg = "${consoleMessage.message()} [${consoleMessage.sourceId()}:${consoleMessage.lineNumber()}]"
                     when (consoleMessage.messageLevel()) {
                         ConsoleMessage.MessageLevel.ERROR -> Log.e(tag, msg)
@@ -223,7 +223,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 super.onReceivedError(view, request, error)
                 if (request?.isForMainFrame == true) {
-                    Log.e("MAYA_AI", "Error loading main frame: ${error?.description} (code: ${error?.errorCode})")
+                    Log.e("AYRA_AI", "Error loading main frame: ${error?.description} (code: ${error?.errorCode})")
                 }
             }
         }

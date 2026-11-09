@@ -16,7 +16,7 @@ export const AndroidActionCenter: React.FC<AndroidActionCenterProps> = ({ onRequ
   const [alarmTime, setAlarmTime] = useState('07:00');
   const [alarmLabel, setAlarmLabel] = useState('Morning Standup');
   const [webQuery, setWebQuery] = useState('');
-  const [notificationMsg, setNotificationMsg] = useState('MAYA neural subsystems fully active.');
+  const [notificationMsg, setNotificationMsg] = useState('AYRA neural subsystems fully active.');
 
   useEffect(() => {
     AndroidIntentService.getDeviceTelemetry().then(setTelemetry);
@@ -29,7 +29,7 @@ export const AndroidActionCenter: React.FC<AndroidActionCenterProps> = ({ onRequ
     onRequestActionConfirm({
       type: 'call',
       title: 'Voice Telephony Intent',
-      description: `MAYA will dispatch an Android 'tel:' intent to initiate a phone call.`,
+      description: `AYRA will dispatch an Android 'tel:' intent to initiate a phone call.`,
       payload: { number: callNumber.trim() },
       requiresConfirmation: true,
     });
@@ -42,9 +42,9 @@ export const AndroidActionCenter: React.FC<AndroidActionCenterProps> = ({ onRequ
     onRequestActionConfirm({
       type: 'open_url',
       title: 'SMS Message Intent',
-      description: `MAYA will launch your default SMS messaging app with pre-filled text.`,
+      description: `AYRA will launch your default SMS messaging app with pre-filled text.`,
       payload: {
-        url: `sms:${smsNumber.trim()}?body=${encodeURIComponent(smsMessage.trim() || 'Message from MAYA AI')}`,
+        url: `sms:${smsNumber.trim()}?body=${encodeURIComponent(smsMessage.trim() || 'Message from AYRA AI')}`,
       },
       requiresConfirmation: true,
     });
@@ -65,7 +65,7 @@ export const AndroidActionCenter: React.FC<AndroidActionCenterProps> = ({ onRequ
     onRequestActionConfirm({
       type: 'open_app',
       title: `Launch ${appName}`,
-      description: `MAYA will dispatch a native deep link intent to open ${appName} on your Android device.`,
+      description: `AYRA will dispatch a native deep link intent to open ${appName} on your Android device.`,
       payload: { appName, query },
       requiresConfirmation: true,
     });
@@ -93,8 +93,8 @@ export const AndroidActionCenter: React.FC<AndroidActionCenterProps> = ({ onRequ
 
   const handleShareSystem = () => {
     AndroidIntentService.shareContent(
-      'MAYA AI Personal Assistant',
-      'Check out MAYA AI — Futuristic Android Personal AI Assistant inspired by JARVIS!',
+      'AYRA AI Personal Assistant',
+      'Check out AYRA AI — Futuristic Android Personal AI Assistant inspired by JARVIS!',
       window.location.href
     );
   };

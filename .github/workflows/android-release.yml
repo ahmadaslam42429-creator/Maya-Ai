@@ -1,4 +1,4 @@
-name: MAYA AI Android Build & Release
+name: AYRA AI Android Build & Release
 
 on:
   push:
@@ -30,10 +30,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js Runtime
+      - name: Setup Node.js 22 Runtime
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
 
@@ -41,7 +41,7 @@ jobs:
         run: |
           npm ci
 
-      - name: Compile MAYA AI Web Assets
+      - name: Compile AYRA AI Web Assets
         run: |
           npm run build
           mkdir -p app/src/main/assets/public
@@ -62,14 +62,16 @@ jobs:
         run: |
           ./gradlew assembleDebug --stacktrace --no-daemon
 
-      - name: Locate, Verify & Package MAYA-AI.apk
+      - name: Locate, Verify & Package AYRA-AI.apk
         id: verify_apk
         run: |
           mkdir -p build-artifacts
           OUTPUT_DIR="app/build/outputs/apk/debug"
 
           # Search for generated APKs
-          if [ -f "$OUTPUT_DIR/MAYA-AI-debug.apk" ]; then
+          if [ -f "$OUTPUT_DIR/AYRA-AI-debug.apk" ]; then
+            TARGET_APK="$OUTPUT_DIR/AYRA-AI-debug.apk"
+          elif [ -f "$OUTPUT_DIR/MAYA-AI-debug.apk" ]; then
             TARGET_APK="$OUTPUT_DIR/MAYA-AI-debug.apk"
           elif [ -f "$OUTPUT_DIR/app-debug.apk" ]; then
             TARGET_APK="$OUTPUT_DIR/app-debug.apk"
@@ -89,21 +91,21 @@ jobs:
             exit 1
           fi
 
-          # Standardize to MAYA-AI.apk and MAYA-AI-debug.apk
-          cp "$TARGET_APK" build-artifacts/MAYA-AI.apk
-          cp "$TARGET_APK" build-artifacts/MAYA-AI-debug.apk
+          # Standardize to AYRA-AI.apk and AYRA-AI-debug.apk
+          cp "$TARGET_APK" build-artifacts/AYRA-AI.apk
+          cp "$TARGET_APK" build-artifacts/AYRA-AI-debug.apk
 
           echo "APK successfully verified:"
-          ls -lh build-artifacts/MAYA-AI.apk
-          sha256sum build-artifacts/MAYA-AI.apk
+          ls -lh build-artifacts/AYRA-AI.apk
+          sha256sum build-artifacts/AYRA-AI.apk
 
       - name: Upload APK as GitHub Actions Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MAYA-AI-apk
+          name: AYRA-AI-apk
           path: |
-            build-artifacts/MAYA-AI.apk
-            build-artifacts/MAYA-AI-debug.apk
+            build-artifacts/AYRA-AI.apk
+            build-artifacts/AYRA-AI-debug.apk
           retention-days: 30
 
       - name: Compute Unique Version Tag & Release Details
@@ -123,15 +125,15 @@ jobs:
           fi
 
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "title=MAYA AI Android Release $TAG" >> $GITHUB_OUTPUT
+          echo "title=AYRA AI Android Release $TAG" >> $GITHUB_OUTPUT
           echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release & Attach MAYA-AI.apk
+      - name: Create GitHub Release & Attach AYRA-AI.apk
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            build-artifacts/MAYA-AI.apk
-            build-artifacts/MAYA-AI-debug.apk
+            build-artifacts/AYRA-AI.apk
+            build-artifacts/AYRA-AI-debug.apk
           name: ${{ steps.release_meta.outputs.title }}
           tag_name: ${{ steps.release_meta.outputs.tag }}
           target_commitish: ${{ github.sha }}
@@ -139,30 +141,32 @@ jobs:
           prerelease: false
           generate_release_notes: true
           body: |
-            ### 🚀 MAYA AI Android Release — ${{ steps.release_meta.outputs.tag }}
+            ### 🚀 AYRA AI Android Release — ${{ steps.release_meta.outputs.tag }}
 
             **Build Details:**
+            - **App Name:** `AYRA AI`
             - **Version Tag:** `${{ steps.release_meta.outputs.tag }}`
             - **Commit:** `${{ github.sha }}`
             - **Build Date:** ${{ steps.release_meta.outputs.build_date }}
-            - **Package Asset:** `MAYA-AI.apk`
+            - **Package Asset:** `AYRA-AI.apk`
 
             ---
 
             ### 🌟 Key Features in this Build:
-            - 🧠 **JARVIS-Inspired Assistant Core**: Powered by Google Gemini AI (`gemini-3.8-flash`) with multi-turn conversation and context memory.
-            - 🎭 **7 Reactive Emotional States**: Happy 😊, Thinking 🤔, Excited 😄, Caring 💙, Confused 😕, Serious 🧠, Sad 🥺 with holographic vector lip-sync animations.
-            - 🎙️ **Voice Engine HUD**: Speech-to-Text and Text-to-Speech with customizable female voice, wake-word mode ("Hey Maya"), and 60fps audio waveform.
-            - 🌐 **Trilingual Polyglot Matrix**: Native comprehension and fluent generation in English, Urdu (اردو), and Hindi (हिन्दी).
-            - 📱 **Mobile Subsystem Integrations**: Direct telephony (`tel:` with confirmation dialog), SMS (`sms:`), Alarm Scheduler, App Deep Links (WhatsApp, YouTube, Google Maps, Camera, Settings), and Vibration Haptics.
-            - 🧰 **Productivity Tools**: Open-Meteo worldwide weather, scientific calculator with history, AI study summarizer, and encrypted memory vault.
+            - 👤 **Extracted Transparent 3D Rigged Avatar**: Isolated character with zero background clutter, natural breathing, eye blinking, pupil gaze tracking, and real skeletal postures (`SIT`, `STAND`, `WAVE`, `THINK`, `TALK`).
+            - 👄 **Phonetic Lip-Sync System**: Real viseme mouth morphing (`A`, `E`, `O`, `U`, `M`, `F`) dynamically synchronized with spoken audio.
+            - 🧠 **JARVIS-Inspired Intelligence Core**: Powered by Google Gemini AI with multi-turn conversation and persistent memory vault.
+            - 👁️ **Optical Camera Vision & OCR**: Live camera frame capture and gallery image analysis with OCR text extraction.
+            - 🌐 **Grounded Internet Search**: Real-time web search with verified clickable citations.
+            - 🗣️ **Trilingual Polyglot Matrix**: Native comprehension and fluent generation in Urdu (اردو), English, and Hindi (हिन्दी).
+            - 📱 **Mobile Subsystem Integrations**: Direct telephony (`tel:` with confirmation dialog), SMS, Alarm Scheduler, App Deep Links, and Haptic Feedback.
 
             ---
 
-            ### 📲 How to Install MAYA-AI.apk on Android:
-            1. Under **Assets** below, tap **`MAYA-AI.apk`** to download directly to your Android device.
+            ### 📲 How to Install AYRA-AI.apk on Android:
+            1. Under **Assets** below, tap **`AYRA-AI.apk`** to download directly to your Android device.
             2. When downloaded, tap the APK in your notification panel or File Manager.
             3. If Android displays *"Install unknown apps"*, enable permission for your browser or file manager.
-            4. Tap **Install** and open **MAYA AI**!
+            4. Tap **Install** and open **AYRA AI**!
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

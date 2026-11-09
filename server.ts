@@ -30,7 +30,7 @@ const getGeminiClient = () => {
   });
 };
 
-const MAYA_SYSTEM_INSTRUCTION = `You are MAYA AI (Modular Advanced Yield Assistant), a sophisticated futuristic personal AI assistant inspired by JARVIS, but with a warm, friendly, highly intelligent female persona.
+const AYRA_SYSTEM_INSTRUCTION = `You are AYRA AI (Advanced Yield & Reasoning Assistant), a sophisticated futuristic personal AI assistant inspired by JARVIS, but with a warm, friendly, highly intelligent female persona.
 Key Guidelines:
 1. Personality: Polite, sharp, empathetic, supportive, futuristic yet warm. You speak with high competence and futuristic elegance.
 2. Multilingual: You are fully fluent in English, Urdu (اردو), and Hindi (हिन्दी).
@@ -67,7 +67,7 @@ Key Guidelines:
    }
 `;
 
-// Intelligent Local NLP Fallback Engine for MAYA
+// Intelligent Local NLP Fallback Engine for AYRA
 function generateLocalResponse(message: string, userLanguage: string = 'auto') {
   const lower = message.toLowerCase().trim();
   const isUrdu = /[\u0600-\u06FF]/.test(message) || userLanguage === 'ur' || lower.includes('urdu');
@@ -107,7 +107,7 @@ function generateLocalResponse(message: string, userLanguage: string = 'auto') {
         type: 'alarm',
         title: 'System Alarm Intent',
         description: `Set system wake-up alarm for ${scheduledTime}`,
-        payload: { time: scheduledTime, label: 'MAYA Wakeup' },
+        payload: { time: scheduledTime, label: 'AYRA Wakeup' },
         requiresConfirmation: true,
       },
     };
@@ -210,7 +210,7 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
         },
       ],
       config: {
-        systemInstruction: MAYA_SYSTEM_INSTRUCTION,
+        systemInstruction: AYRA_SYSTEM_INSTRUCTION,
         responseMimeType: 'application/json',
       },
     });
@@ -275,7 +275,7 @@ Text to summarize:
 ${text.slice(0, 15000)}
 """`,
       config: {
-        systemInstruction: `You are MAYA's high-speed Document & Intelligence Synthesizer. Output clean, executive-level summaries in JSON format:
+        systemInstruction: `You are AYRA's high-speed Document & Intelligence Synthesizer. Output clean, executive-level summaries in JSON format:
 {
   "summary": "Cohesive executive summary paragraph",
   "keyPoints": ["Bullet 1", "Bullet 2", "Bullet 3", "Bullet 4"],
@@ -321,7 +321,7 @@ Text:
 ${text}
 """`,
       config: {
-        systemInstruction: `You are MAYA's Multilingual Neural Translator. Return valid JSON:
+        systemInstruction: `You are AYRA's Multilingual Neural Translator. Return valid JSON:
 {
   "translatedText": "Translated text in native script",
   "pronunciation": "Phonetic / Roman pronunciation if target is Urdu or Hindi",
@@ -370,7 +370,7 @@ app.post('/api/gemini/vision', async (req: Request, res: Response) => {
           role: 'user',
           parts: [
             {
-              text: `You are MAYA AI's Optical Vision Subsystem.
+              text: `You are AYRA AI's Optical Vision Subsystem.
 User Language: ${userLanguage}.
 Task: ${prompt}.
 Please analyze the image comprehensively. Respond in valid JSON format:
@@ -422,7 +422,7 @@ app.post('/api/gemini/search', async (req: Request, res: Response) => {
     if (!ai) {
       return res.json({
         query,
-        summary: `Offline Search Simulation for "${query}". In connected mode, MAYA retrieves real-time live internet results, news, and grounded citations.`,
+        summary: `Offline Search Simulation for "${query}". In connected mode, AYRA retrieves real-time live internet results, news, and grounded citations.`,
         sources: [
           { title: `Search for "${query}" on Google`, url: `https://www.google.com/search?q=${encodeURIComponent(query)}` },
           { title: 'Wikipedia Knowledge Base', url: `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}` },
@@ -482,7 +482,7 @@ app.post('/api/gemini/search', async (req: Request, res: Response) => {
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({
     status: 'online',
-    assistant: 'MAYA AI',
+    assistant: 'AYRA AI',
     version: '2.5.0-futuristic',
     geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
     timestamp: new Date().toISOString(),
@@ -506,7 +506,7 @@ async function startServer() {
   }
 
   app.listen(Number(PORT), '0.0.0.0', () => {
-    console.log(`🚀 MAYA AI Server online on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 AYRA AI Server online on http://0.0.0.0:${PORT}`);
   });
 }
 

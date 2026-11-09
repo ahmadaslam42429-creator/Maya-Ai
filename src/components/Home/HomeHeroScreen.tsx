@@ -1,5 +1,5 @@
 /**
- * MAYA AI — Master Home Cockpit & Hero Avatar Stage
+ * AYRA AI — Master Home Cockpit & Hero Avatar Stage
  * Central 3D Avatar presentation, immediate voice dispatch, and system shortcuts
  * @license Apache-2.0
  */
@@ -124,7 +124,7 @@ export const HomeHeroScreen: React.FC<HomeHeroScreenProps> = ({
         <div className="flex items-center justify-between border-b border-cyan-500/20 pb-1.5 mb-2">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-hud text-cyan-400 uppercase tracking-widest">
-              {isListening ? '🎙️ Listening to Voice Command...' : isSpeaking ? '🔊 MAYA Vocalizing...' : '💬 Assistant Status'}
+              {isListening ? '🎙️ Listening to Voice Command...' : isSpeaking ? '🔊 AYRA Vocalizing...' : '💬 Assistant Status'}
             </span>
           </div>
 
@@ -147,7 +147,7 @@ export const HomeHeroScreen: React.FC<HomeHeroScreenProps> = ({
               }`}
             >
               <Mic className="w-3 h-3" />
-              <span>{isListening ? 'Stop Mic' : 'Talk to MAYA'}</span>
+              <span>{isListening ? 'Stop Mic' : 'Talk to AYRA'}</span>
             </button>
           </div>
         </div>

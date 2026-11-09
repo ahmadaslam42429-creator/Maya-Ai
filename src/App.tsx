@@ -1,5 +1,5 @@
 /**
- * MAYA AI — Master Cockpit & Personal Assistant Coordinator
+ * AYRA AI — Master Cockpit & Personal Assistant Coordinator
  * @license Apache-2.0
  */
 
@@ -54,14 +54,14 @@ export default function App() {
   // 3D Avatar Pose State (Persisted in localStorage)
   const [avatarPose, setAvatarPose] = useState<AvatarPose>(() => {
     try {
-      const saved = localStorage.getItem('maya_avatar_pose');
+      const saved = localStorage.getItem('ayra_avatar_pose') || localStorage.getItem('maya_avatar_pose');
       if (saved) return saved as AvatarPose;
     } catch {}
-    return 'sit'; // Default seated workstation pose matching uploaded reference image
+    return 'sit'; // Default seated workstation pose matching extracted character
   });
 
   useEffect(() => {
-    localStorage.setItem('maya_avatar_pose', avatarPose);
+    localStorage.setItem('ayra_avatar_pose', avatarPose);
   }, [avatarPose]);
 
   // Core Assistant States
@@ -69,14 +69,14 @@ export default function App() {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
-  const [lastReply, setLastReply] = useState('Greetings! I am MAYA AI, your futuristic personal assistant. Ready for your command.');
+  const [lastReply, setLastReply] = useState('Greetings! I am AYRA AI, your futuristic personal assistant. Ready for your command.');
   const [pendingAction, setPendingAction] = useState<AssistantAction | null>(null);
   const [activeTheme, setActiveTheme] = useState('navy');
 
   // Voice & Language Settings
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(() => {
     try {
-      const saved = localStorage.getItem('maya_voice_settings');
+      const saved = localStorage.getItem('ayra_voice_settings') || localStorage.getItem('maya_voice_settings');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
@@ -93,14 +93,14 @@ export default function App() {
   // Conversation Stream
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
-      const saved = localStorage.getItem('maya_chat_history');
+      const saved = localStorage.getItem('ayra_chat_history') || localStorage.getItem('maya_chat_history');
       if (saved) return JSON.parse(saved);
     } catch {}
     return [
       {
         id: 'msg-welcome',
         role: 'assistant',
-        text: "Systems online. Greetings Commander! I am MAYA AI (Modular Advanced Yield Assistant). I can answer complex queries, assist your studies, synthesize documents, translate between Urdu, English and Hindi, and dispatch Android phone tasks like calls, alarms, and app navigation. How may I serve you today?",
+        text: "Systems online. Greetings Commander! I am AYRA AI (Advanced Yield & Reasoning Assistant). I can answer complex queries, assist your studies, synthesize documents, translate between Urdu, English and Hindi, and dispatch Android phone tasks like calls, alarms, and app navigation. How may I serve you today?",
         emotion: 'excited',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         language: 'en',
@@ -338,7 +338,7 @@ export default function App() {
       case 'alarm': {
         const time = action.payload?.time;
         AndroidIntentService.openApplication('alarm', time);
-        AndroidIntentService.sendNotification('Alarm Scheduled', `MAYA scheduled alarm for ${time}`);
+        AndroidIntentService.sendNotification('Alarm Scheduled', `AYRA scheduled alarm for ${time}`);
         break;
       }
 
@@ -443,7 +443,7 @@ export default function App() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-hud font-extrabold text-base tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 text-glow-cyan">
-                  MAYA AI
+                  AYRA AI
                 </span>
                 <span className="text-[9px] font-hud px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-500/40 text-cyan-300">
                   v3.0 3D

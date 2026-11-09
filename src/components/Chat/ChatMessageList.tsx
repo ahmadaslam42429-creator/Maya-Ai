@@ -154,7 +154,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
             {/* Sender and Emotion Header */}
             <div className="flex items-center gap-2 mb-1 text-[11px] font-tech text-slate-400 px-1">
               <span className="font-bold text-slate-300">
-                {isAssistant ? 'MAYA AI' : 'Commander'}
+                {isAssistant ? 'AYRA AI' : 'Commander'}
               </span>
               <span>•</span>
               <span className="font-mono text-[10px] text-slate-500">{msg.timestamp}</span>

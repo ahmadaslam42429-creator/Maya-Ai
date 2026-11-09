@@ -1,5 +1,5 @@
 /**
- * MAYA AI Voice Service
+ * AYRA AI Voice Service
  * Comprehensive Speech-to-Text (STT) and Text-to-Speech (TTS) manager with Web Audio HUD synthesizer.
  */
 

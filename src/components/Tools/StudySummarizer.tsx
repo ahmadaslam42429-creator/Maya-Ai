@@ -136,7 +136,7 @@ export const StudySummarizer: React.FC = () => {
           rows={5}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="Paste complex text, lecture notes, academic paper, or long message here for MAYA to synthesize..."
+          placeholder="Paste complex text, lecture notes, academic paper, or long message here for AYRA to synthesize..."
           className="w-full bg-[#050B1B] border border-cyan-500/30 rounded-xl p-3 text-xs text-white placeholder-slate-500 outline-none focus:border-cyan-400 font-tech leading-relaxed resize-none"
         />
 

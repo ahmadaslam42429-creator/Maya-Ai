@@ -39,7 +39,7 @@ export const ActionConfirmationModal: React.FC<ActionConfirmationModalProps> = (
       case 'call':
         return `Target Phone Number: ${action.payload?.number || 'Specified Contact'}`;
       case 'alarm':
-        return `Alarm Time: ${action.payload?.time || 'Scheduled Time'} (${action.payload?.label || 'MAYA Wakeup'})`;
+        return `Alarm Time: ${action.payload?.time || 'Scheduled Time'} (${action.payload?.label || 'AYRA Wakeup'})`;
       case 'reminder':
         return `Reminder: "${action.payload?.title || action.title}" at ${action.payload?.time || 'Scheduled'}`;
       case 'open_app':
@@ -91,7 +91,7 @@ export const ActionConfirmationModal: React.FC<ActionConfirmationModalProps> = (
 
         {/* Action Description */}
         <p className="text-sm text-slate-300 mb-4 leading-relaxed">
-          {action.description || 'MAYA is requesting authorization to launch a native Android subsystem intent.'}
+          {action.description || 'AYRA is requesting authorization to launch a native Android subsystem intent.'}
         </p>
 
         {/* Intent Details Box */}

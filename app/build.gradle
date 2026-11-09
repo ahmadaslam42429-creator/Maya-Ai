@@ -39,9 +39,9 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
             if (variant.buildType.name == "debug") {
-                outputFileName = "MAYA-AI-debug.apk"
+                outputFileName = "AYRA-AI-debug.apk"
             } else {
-                outputFileName = "MAYA-AI-${variant.name}.apk"
+                outputFileName = "AYRA-AI-${variant.name}.apk"
             }
         }
     }
