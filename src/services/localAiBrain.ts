@@ -214,10 +214,10 @@ export function processLocalBrainMessage(
   }
 
   // 7. Urdu Language Conversation
-  if (isUrdu || lower.includes('urdu') || text.includes('کون ہو') || text.includes('کیسے ہو') || text.includes('سلام')) {
-    if (text.includes('سلام') || text.includes('ہیلو') || lower.includes('salam')) {
+  if (isUrdu || lower.includes('urdu') || text.includes('کون ہو') || text.includes('کیسے ہو') || text.includes('سلام') || text.includes('ہیلو')) {
+    if (text.includes('سلام') || text.includes('ہیلو') || lower.includes('salam') || lower.includes('assalam')) {
       return {
-        reply: 'وعلیکم السلام! میں مایا ہوں، آپ کی ذاتی اور جدید ترین اے آئی اسسٹنٹ۔ میرے تمام سسٹمز، وائس سنتھیسائزر اور اینڈرائیڈ کنٹرولز بالکل تیار ہیں۔ آج میں آپ کی کیا مدد کر سکتی ہوں؟',
+        reply: 'وعلیکم السلام! میں آئرا ہوں (AYRA AI)، آپ کی ذاتی اور دوستانہ اے آئی اسسٹنٹ۔ میں آپ کی پڑھائی، کاموں، سوالات اور فون کنٹرول میں کیسے مدد کر سکتی ہوں؟',
         emotion: 'happy',
         detectedLanguage: 'ur',
         action: null,
@@ -227,6 +227,14 @@ export function processLocalBrainMessage(
       return {
         reply: 'میرا نام آئرا ہے (AYRA - Advanced Yield & Reasoning Assistant)۔ میں ایک جدید، ہوشیار اور دوستانہ اے آئی اسسٹنٹ ہوں جو جاروس (JARVIS) سے متاثر ہو کر بنائی گئی ہے۔ میں آپ کے فون کے کام، پڑھائی، اردو اور انگریزی ترجمہ اور عمومی معلومات میں مدد کرتی ہوں۔',
         emotion: 'excited',
+        detectedLanguage: 'ur',
+        action: null,
+      };
+    }
+    if (text.includes('کیسے') || text.includes('کیسی')) {
+      return {
+        reply: 'الحمدللہ میں بالکل خیریت سے ہوں، شکریہ! آپ کیسے ہیں؟ امید ہے آپ کا دن خوشگوار گزر رہا ہوگا۔ فرمائیے میں آپ کی کیا مدد کر سکتی ہوں؟',
+        emotion: 'caring',
         detectedLanguage: 'ur',
         action: null,
       };
@@ -242,7 +250,7 @@ export function processLocalBrainMessage(
   // 8. Hindi Language Conversation
   if (isHindi || lower.includes('hindi') || text.includes('नमस्ते') || text.includes('कैसी हो')) {
     return {
-      reply: `नमस्ते! मैं माया हूँ, आपकी फ्यूचरिस्टिक पर्सनल एआई असिस्टेंट। मेरे सभी न्यूरल सिस्टम्स, वॉयस रिकग्निशन और एंड्रॉइड कमांड्स पूरी तरह सक्रिय हैं। बताइए, मैं आपकी किस प्रकार सहायता कर सकती हूँ?`,
+      reply: `नमस्ते! मैं आयरा हूँ (AYRA AI), आपकी फ्यूचरिस्टिक पर्सनल एआई असिस्टेंट। मेरे सभी न्यूरल सिस्टम्स, वॉयस रिकग्निशन और एंड्रॉइड कमांड्स पूरी तरह सक्रिय हैं। बताइए, आज मैं आपकी क्या सहायता करूँ?`,
       emotion: 'happy',
       detectedLanguage: 'hi',
       action: null,
@@ -261,25 +269,34 @@ export function processLocalBrainMessage(
 
   if (lower.includes('who are you') || lower.includes('what are you') || lower.includes('introduce')) {
     return {
-      reply: `I am AYRA AI — Advanced Yield & Reasoning Assistant. Inspired by JARVIS and designed with a friendly, high-tech persona. I possess speech recognition, audio synthesis, multi-language fluency (English, Urdu, Hindi), Android intent automation, and study synthesis capabilities.`,
+      reply: `I am AYRA AI — Advanced Yield & Reasoning Assistant! Inspired by JARVIS and designed with a friendly, high-tech persona. I possess speech recognition, audio synthesis, multi-language fluency (English, Urdu, Hindi), Android intent automation, and study synthesis capabilities.`,
       emotion: 'excited',
       detectedLanguage: 'en',
       action: null,
     };
   }
 
-  if (lower.includes('how are you') || lower.includes('status') || lower.includes('system check')) {
+  if (lower.includes('how are you') || lower.includes('how r u') || lower.includes('how are things')) {
     return {
-      reply: `All diagnostic telemetry reports optimal performance, Commander. Core processors operating at 100%, audio synthesis channels clear, and Android intent dispatch bridge synchronized. Standing by for instructions.`,
+      reply: `I'm doing wonderful, thank you for asking! Ready and excited to help you explore ideas, solve questions, or organize your Android phone tasks. How can I assist you right now?`,
       emotion: 'happy',
       detectedLanguage: 'en',
       action: null,
     };
   }
 
-  // 10. General Articulate AI Response
+  if (lower.startsWith('hi') || lower.startsWith('hello') || lower.startsWith('hey')) {
+    return {
+      reply: `Hello there! I'm AYRA, your personal AI assistant. It's great to hear from you. How can I help you today?`,
+      emotion: 'happy',
+      detectedLanguage: 'en',
+      action: null,
+    };
+  }
+
+  // 10. General Natural AI Response
   return {
-    reply: `Commander, I have analyzed your command: "${text}". All subroutines and voice channels are synchronized. Let me know if you would like me to draft text, summarize documents, set an Android alarm or call a contact.`,
+    reply: `I'm right here with you! Whether you'd like to brainstorm, ask a question, summarize an article, or dispatch an Android task, feel free to speak or type your request.`,
     emotion: 'caring',
     detectedLanguage: 'en',
     action: null,

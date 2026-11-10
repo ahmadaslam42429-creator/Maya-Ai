@@ -129,7 +129,7 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initialize Speech Synthesizer for MAYA Female Voice
+        // Initialize Speech Synthesizer for AYRA Female Voice
         tts = TextToSpeech(this, this)
 
         // Request Audio and Phone Permissions
@@ -603,7 +603,7 @@ git push -u origin main`}
                 <span>.github/workflows/android-release.yml</span>
               </div>
               <button
-                onClick={() => copyToClipboard(`name: MAYA AI Android Build & Release
+                onClick={() => copyToClipboard(`name: AYRA AI Android Build & Release
 
 on:
   push:
@@ -636,7 +636,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
 
@@ -662,20 +662,20 @@ jobs:
         run: |
           mkdir -p build-artifacts
           OUTPUT_DIR="app/build/outputs/apk/debug"
-          if [ -f "$OUTPUT_DIR/MAYA-AI-debug.apk" ]; then
-            TARGET_APK="$OUTPUT_DIR/MAYA-AI-debug.apk"
+          if [ -f "$OUTPUT_DIR/AYRA-AI-debug.apk" ]; then
+            TARGET_APK="$OUTPUT_DIR/AYRA-AI-debug.apk"
           else
             TARGET_APK=$(find app/build/outputs/apk -name "*.apk" | head -n 1)
           fi
-          cp "$TARGET_APK" build-artifacts/MAYA-AI.apk
-          cp "$TARGET_APK" build-artifacts/MAYA-AI-debug.apk
+          cp "$TARGET_APK" build-artifacts/AYRA-AI.apk
+          cp "$TARGET_APK" build-artifacts/AYRA-AI-debug.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: MAYA-AI-apk
+          name: AYRA-AI-apk
           path: |
-            build-artifacts/MAYA-AI.apk
-            build-artifacts/MAYA-AI-debug.apk
+            build-artifacts/AYRA-AI.apk
+            build-artifacts/AYRA-AI-debug.apk
 
       - name: Compute Release Tag
         id: release_meta
@@ -692,9 +692,9 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            build-artifacts/MAYA-AI.apk
-            build-artifacts/MAYA-AI-debug.apk
-          name: "MAYA AI Android Release \${{ steps.release_meta.outputs.tag }}"
+            build-artifacts/AYRA-AI.apk
+            build-artifacts/AYRA-AI-debug.apk
+          name: "AYRA AI Android Release \${{ steps.release_meta.outputs.tag }}"
           tag_name: \${{ steps.release_meta.outputs.tag }}
           target_commitish: \${{ github.sha }}
           draft: false
@@ -708,7 +708,7 @@ jobs:
               </button>
             </div>
             <pre className="p-2.5 rounded-lg bg-black/70 text-cyan-300 font-mono text-[10px] overflow-x-auto max-h-64">
-{`name: MAYA AI Android Build & Release
+{`name: AYRA AI Android Build & Release
 on:
   push:
     branches: [ main, master ]
@@ -722,17 +722,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'npm', cache-dependency-path: 'package-lock.json' }
+        with: { node-version: 22, cache: 'npm', cache-dependency-path: 'package-lock.json' }
       - run: npm ci && npm run build
       - uses: actions/setup-java@v4
         with: { distribution: 'temurin', java-version: '17', cache: 'gradle' }
       - run: chmod +x gradlew && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
-        with: { name: MAYA-AI-apk, path: build-artifacts/ }
+        with: { name: AYRA-AI-apk, path: build-artifacts/ }
       - uses: softprops/action-gh-release@v2
         with:
-          files: build-artifacts/MAYA-AI.apk
-          name: "MAYA AI Android Release v1.0.\${{ github.run_number }}"
+          files: build-artifacts/AYRA-AI.apk
+          name: "AYRA AI Android Release v1.0.\${{ github.run_number }}"
           tag_name: "v1.0.\${{ github.run_number }}"`}
             </pre>
           </div>

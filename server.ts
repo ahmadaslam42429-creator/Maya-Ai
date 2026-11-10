@@ -67,7 +67,7 @@ Key Guidelines:
    }
 `;
 
-// Intelligent Local NLP Fallback Engine for AYRA
+// Intelligent Local NLP & Conversational Engine for AYRA
 function generateLocalResponse(message: string, userLanguage: string = 'auto') {
   const lower = message.toLowerCase().trim();
   const isUrdu = /[\u0600-\u06FF]/.test(message) || userLanguage === 'ur' || lower.includes('urdu');
@@ -80,7 +80,7 @@ function generateLocalResponse(message: string, userLanguage: string = 'auto') {
     return {
       reply: isUrdu
         ? `میں آپ کی کال ملانے کے لیے تیار ہوں۔ سیکیورٹی کے لیے، برائے مہربانی ڈائلر کھولنے سے پہلے تصدیق کریں۔`
-        : `I have prepared the call to ${targetNum}. For your security, please confirm before dispatching to the Android dialer.`,
+        : `I'm ready to place the call to ${targetNum}. For your safety and verification, please confirm to launch the Android dialer.`,
       emotion: 'serious',
       detectedLanguage: isUrdu ? 'ur' : 'en',
       action: {
@@ -99,8 +99,8 @@ function generateLocalResponse(message: string, userLanguage: string = 'auto') {
     const scheduledTime = timeMatch ? timeMatch[0] : '07:00';
     return {
       reply: isUrdu
-        ? `میں نے ${scheduledTime} بجے کے الارم کے لیے انٹینٹ تیار کر لیا ہے۔ تصدیق کے بعد یہ آپ کے فون پر سیٹ ہو جائے گا۔`
-        : `I have prepared an alarm for ${scheduledTime}. Confirming this action will register it in your Android clock system.`,
+        ? `میں نے ${scheduledTime} بجے کا الارم تیار کر لیا ہے۔ تصدیق کرتے ہی یہ آپ کے فون پر سیٹ ہو جائے گا۔`
+        : `I've set up an alarm for ${scheduledTime}. Just confirm, and it will be scheduled directly in your Android clock.`,
       emotion: 'excited',
       detectedLanguage: isUrdu ? 'ur' : 'en',
       action: {
@@ -119,54 +119,122 @@ function generateLocalResponse(message: string, userLanguage: string = 'auto') {
     const city = cityMatch ? cityMatch[1].trim() : 'Islamabad';
     return {
       reply: isUrdu
-        ? `سیٹلائٹ ماحولیاتی سینسرز فعال ہیں۔ میں نے آپ کے لیے ${city} کے موسمی کوائف کا مینو کھول دیا ہے۔`
-        : `Orbital meteorological sensors locked on ${city}. Opening real-time atmospheric telemetry and forecast.`,
+        ? `میں نے ${city} کے موسمی کوائف کا مینو کھول دیا ہے۔ آپ موجودہ درجہ حرارت اور پیشن گوئی دیکھ سکتے ہیں۔`
+        : `Checking current weather telemetry for ${city}. Opening your atmospheric forecast view now.`,
       emotion: 'thinking',
       detectedLanguage: isUrdu ? 'ur' : 'en',
       action: {
         type: 'weather',
         title: 'Atmospheric Weather Telemetry',
-        description: `Fetch satellite weather for ${city}`,
+        description: `Fetch weather for ${city}`,
         payload: { city },
         requiresConfirmation: false,
       },
     };
   }
 
-  // Urdu Intro or greeting
-  if (isUrdu || lower.includes('urdu') || lower.includes('اردو')) {
+  // Natural Greetings (Salam, Hi, Hello, Hey)
+  if (
+    lower.startsWith('hi') ||
+    lower.startsWith('hello') ||
+    lower.startsWith('hey') ||
+    lower.includes('salam') ||
+    lower.includes('assalam') ||
+    message.includes('سلام') ||
+    message.includes('ہیلو') ||
+    message.includes('नमस्ते')
+  ) {
+    if (message.includes('سلام') || lower.includes('salam') || lower.includes('assalam')) {
+      return {
+        reply: `وعلیکم السلام! میں آئرا ہوں (AYRA AI)، آپ کی ذاتی اور دوستانہ اے آئی اسسٹنٹ۔ میں آپ کی پڑھائی، روزمرہ کاموں، معلومات اور فون کنٹرول میں کیسے مدد کر سکتی ہوں؟`,
+        emotion: 'happy',
+        detectedLanguage: 'ur',
+        action: null,
+      };
+    }
+    if (isUrdu) {
+      return {
+        reply: `ہیلو! میں آئرا ہوں (AYRA AI)۔ آپ سے مل کر خوشی ہوئی۔ فرمائیے، آج میں آپ کی کیا مدد کروں؟`,
+        emotion: 'happy',
+        detectedLanguage: 'ur',
+        action: null,
+      };
+    }
+    if (isHindi || message.includes('नमस्ते')) {
+      return {
+        reply: `नमस्ते! मैं आयرا हूँ (AYRA AI), आपकी पर्सनल एआई असिस्टेंट। आपसे मिलकर बहुत खुशी हुई। बताइए, आज मैं आपकी क्या सहायता करूँ?`,
+        emotion: 'happy',
+        detectedLanguage: 'hi',
+        action: null,
+      };
+    }
     return {
-      reply: `ہیلو! میں مایا ہوں، آپ کی ذاتی جدید ترین اے آئی اسسٹنٹ۔ میں آپ کے سوالات کے جوابات دے سکتی ہوں، پیچیدہ عنوانات کی وضاحت کر سکتی ہوں، زبانوں کا ترجمہ کر سکتی ہوں، اور آپ کے اینڈرائیڈ فون کے کام جیسے کالز، الارم اور میسجز سنبھال سکتی ہوں۔ فرمائیے میں آپ کی کیا خدمت کروں؟`,
+      reply: `Hello there! I'm AYRA, your personal AI assistant. It's wonderful to connect with you! How can I help you today?`,
       emotion: 'happy',
-      detectedLanguage: 'ur',
+      detectedLanguage: 'en',
       action: null,
     };
   }
 
-  // Hindi Intro or greeting
-  if (isHindi || lower.includes('hindi') || lower.includes('हिन्दी')) {
+  // "How are you?" / "kaisy ho?"
+  if (lower.includes('how are you') || lower.includes('kaisay ho') || lower.includes('kaisi ho') || message.includes('کیسے ہو') || message.includes('کیسی ہو')) {
+    if (isUrdu || message.includes('کیسے') || message.includes('کیسی')) {
+      return {
+        reply: `الحمدللہ میں بالکل ٹھیک ہوں، شکریہ! آپ کیسے ہیں؟ امید ہے آپ کا دن بہت اچھا گزر رہا ہوگا۔ میں آپ کی کسی بھی کام یا سوال میں مدد کے لیے حاضر ہوں۔`,
+        emotion: 'caring',
+        detectedLanguage: 'ur',
+        action: null,
+      };
+    }
     return {
-      reply: `नमस्ते! मैं माया हूँ, आपकी फ्यूचरिस्टिक पर्सनल एआई असिस्टेंट। मैं सामान्य ज्ञान, अध्ययन, अनुवाद और आपके एंड्रॉइड फोन के कार्यों में आपकी पूरी मदद कर सकती हूँ। आज मैं आपकी क्या सहायता करूँ?`,
-      emotion: 'happy',
-      detectedLanguage: 'hi',
+      reply: `I'm doing wonderful, thank you for asking! Ready and excited to help you with research, writing, voice tasks, or whatever you need. How is your day going?`,
+      emotion: 'caring',
+      detectedLanguage: 'en',
       action: null,
     };
   }
 
-  // Quantum computing / educational explanation
-  if (lower.includes('quantum') || lower.includes('ai') || lower.includes('explain')) {
+  // Who are you / Identity
+  if (lower.includes('who are you') || lower.includes('what is your name') || lower.includes('introduce') || message.includes('کون ہو') || message.includes('تعارف')) {
+    if (isUrdu || message.includes('کون ہو')) {
+      return {
+        reply: `میرا نام آئرا ہے (AYRA AI — Advanced Yield & Reasoning Assistant)۔ میں ایک جدید، باصلاحیت اور دوستانہ پرسنل اے آئی اسسٹنٹ ہوں جو جاروس (JARVIS) سے متاثر ہو کر بنائی گئی ہے۔ میں آپ کے فون پر کالز، الارم، کیمرہ وژن، انٹرنیٹ سرچ اور اردو، انگلش و ہندی میں مکمل گفتگو کی صلاحیت رکھتی ہوں۔`,
+        emotion: 'excited',
+        detectedLanguage: 'ur',
+        action: null,
+      };
+    }
     return {
-      reply: `Certainly, Commander. Quantum computing replaces classical binary bits (0 or 1) with qubits that leverage quantum superposition and entanglement. This allows quantum systems to compute countless computational pathways simultaneously, exponentially accelerating complex tasks like cryptography, molecular modeling, and neural network optimization.`,
+      reply: `I am AYRA AI — Advanced Yield & Reasoning Assistant! Inspired by futuristic systems like JARVIS, but with a friendly, empathetic personality. I can chat naturally, synthesize research, translate languages, search the web, analyze images with computer vision, and handle Android phone actions like calls and alarms.`,
+      emotion: 'excited',
+      detectedLanguage: 'en',
+      action: null,
+    };
+  }
+
+  // Science / Knowledge Explanation
+  if (lower.includes('quantum') || lower.includes('ai') || lower.includes('explain') || lower.includes('what is')) {
+    return {
+      reply: `Quantum computing replaces classical binary bits with qubits that take advantage of quantum superposition and entanglement. This allows quantum algorithms to evaluate numerous possibilities simultaneously, exponentially accelerating complex challenges like molecular modeling, cryptography, and optimization.`,
       emotion: 'thinking',
       detectedLanguage: 'en',
       action: null,
     };
   }
 
-  // General helpful response
+  // General helpful, friendly, natural reply
+  if (isUrdu) {
+    return {
+      reply: `میں نے آپ کی بات سمجھ لی ہے۔ میں اردو، ہندی اور انگریزی میں روانی سے کام کرتی ہوں۔ آپ مجھ سے کوئی بھی سوال پوچھ سکتے ہیں یا فون کا کوئی بھی کام تفویض کر سکتے ہیں۔`,
+      emotion: 'happy',
+      detectedLanguage: 'ur',
+      action: null,
+    };
+  }
+
   return {
-    reply: `Commander, I acknowledge your message: "${message}". All neural matrices, voice synthesizers, and Android intent filters are operating at 100% capacity. How would you like to proceed?`,
-    emotion: 'caring',
+    reply: `I'm right here with you! Whether you'd like to brainstorm an idea, solve a problem, search the web, or adjust settings, just let me know how you'd like to proceed.`,
+    emotion: 'happy',
     detectedLanguage: 'en',
     action: null,
   };

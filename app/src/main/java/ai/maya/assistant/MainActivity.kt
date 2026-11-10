@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // Load MAYA AI Application
+        // Load AYRA AI Application
         loadAssistantApp()
     }
 
