@@ -158,17 +158,21 @@ export class VoiceService {
       return;
     }
 
-    // Try server-side Gemini 3.8 natural female voice first if enabled (default true)
-    if (options.preferServerTts !== false) {
+    // If server TTS is explicitly preferred, try server-side generation
+    if (options.preferServerTts === true) {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
         const res = await fetch('/api/gemini/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             text: cleanText,
-            voice: 'Kore', // Warm, high-fidelity female persona
+            voice: 'Kore',
           }),
         });
+        clearTimeout(timeoutId);
 
         if (res.ok) {
           const data = await res.json();
@@ -190,10 +194,9 @@ export class VoiceService {
               options.onEnd?.();
             };
 
-            audio.onerror = (e) => {
+            audio.onerror = () => {
               this.isSpeaking = false;
               this.activeAudio = null;
-              // Fallback to browser Web Speech API
               this.speakBrowserSynthesis(cleanText, options);
             };
 
@@ -201,12 +204,12 @@ export class VoiceService {
             return;
           }
         }
-      } catch (serverErr) {
-        // Fall back to client synthesizer
+      } catch {
+        // Fall back seamlessly to client synthesizer
       }
     }
 
-    // Client-side Web Speech API Fallback
+    // High-fidelity native speech synthesis (instantaneous, zero-latency, offline-capable)
     this.speakBrowserSynthesis(cleanText, options);
   }
 

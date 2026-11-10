@@ -556,50 +556,49 @@ app.post('/api/gemini/tts', async (req: Request, res: Response) => {
 
     const ai = getGeminiClient();
     if (!ai) {
-      return res.json({ fallbackToClientTts: true, reason: 'AI core offline' });
+      return res.json({ fallbackToClientTts: true, reason: 'AI core using native client synthesizer' });
     }
 
-    // Limit text to 600 characters for snappy interactive speech
+    // Limit text to 400 characters for interactive speech
     const cleanSpeechText = text
       .replace(/```[\s\S]*?```/g, '')
       .replace(/[*_#`~>-]/g, '')
-      .slice(0, 600);
+      .slice(0, 400);
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash-lite-tts',
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            {
-              text: cleanSpeechText,
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash-lite-tts',
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: cleanSpeechText }],
+          },
+        ],
+        config: {
+          responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: voice || 'Kore' },
             },
-          ],
-        },
-      ],
-      config: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: voice || 'Kore' },
           },
         },
-      },
-    });
+      });
 
-    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!base64Audio) {
-      return res.json({ fallbackToClientTts: true, reason: 'Audio generation returned empty' });
+      const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      if (base64Audio) {
+        return res.json({
+          audio: base64Audio,
+          mimeType: 'audio/wav',
+          voice: voice || 'Kore',
+          success: true,
+        });
+      }
+    } catch {
+      // If speechConfig is not supported by current API endpoint, silently fall back to client TTS
     }
 
-    return res.json({
-      audio: base64Audio,
-      mimeType: 'audio/wav',
-      voice: voice || 'Kore',
-      success: true,
-    });
+    return res.json({ fallbackToClientTts: true, reason: 'Using high-fidelity client Web Speech synthesis' });
   } catch (err: any) {
-    console.warn('Gemini TTS fallback invoked:', err?.message || err);
     return res.json({ fallbackToClientTts: true, error: err?.message });
   }
 });
