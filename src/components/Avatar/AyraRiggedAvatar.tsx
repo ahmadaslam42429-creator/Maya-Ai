@@ -347,8 +347,14 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
           transparent: true,
           roughness: 0.3,
           metalness: 0.1,
+          color: new THREE.Color(0xb8faff),
+          emissive: new THREE.Color(0x00bfe8),
+          emissiveIntensity: 0.32,
+          blending: THREE.AdditiveBlending,
+          transparent: true,
+          depthWrite: false,
           side: THREE.DoubleSide,
-          alphaTest: 0.05,
+          alphaTest: 0.035,
         });
         seatedMesh = new THREE.Mesh(geo, mat);
         seatedMesh.position.set(0, 0.65, 0);
@@ -370,8 +376,14 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
           transparent: true,
           roughness: 0.3,
           metalness: 0.1,
+          color: new THREE.Color(0xb8faff),
+          emissive: new THREE.Color(0x00bfe8),
+          emissiveIntensity: 0.32,
+          blending: THREE.AdditiveBlending,
+          transparent: true,
+          depthWrite: false,
           side: THREE.DoubleSide,
-          alphaTest: 0.05,
+          alphaTest: 0.035,
           opacity: 0,
         });
         standingMesh = new THREE.Mesh(geo, mat);
@@ -395,8 +407,14 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
           transparent: true,
           roughness: 0.3,
           metalness: 0.1,
+          color: new THREE.Color(0xb8faff),
+          emissive: new THREE.Color(0x00bfe8),
+          emissiveIntensity: 0.32,
+          blending: THREE.AdditiveBlending,
+          transparent: true,
+          depthWrite: false,
           side: THREE.DoubleSide,
-          alphaTest: 0.05,
+          alphaTest: 0.035,
           opacity: 0,
         });
         wavingMesh = new THREE.Mesh(geo, mat);
