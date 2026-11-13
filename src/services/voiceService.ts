@@ -209,7 +209,41 @@ export class VoiceService {
       }
     }
 
-    // High-fidelity native speech synthesis (instantaneous, zero-latency, offline-capable)
+    // Android System WebView does not expose SpeechSynthesis reliably.
+    // Use the Android TextToSpeech bridge supplied by MainActivity.
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (nativeBridge && typeof nativeBridge.speakText === 'function') {
+      const onNativeStart = () => {
+        this.isSpeaking = true;
+        options.onStart?.();
+      };
+      const cleanup = () => {
+        window.removeEventListener('ayra-tts-start', onNativeStart);
+        window.removeEventListener('ayra-tts-end', onNativeEnd);
+        window.removeEventListener('ayra-tts-error', onNativeError);
+      };
+      const onNativeEnd = () => {
+        this.isSpeaking = false;
+        cleanup();
+        options.onEnd?.();
+      };
+      const onNativeError = (event: Event) => {
+        this.isSpeaking = false;
+        cleanup();
+        options.onError?.((event as CustomEvent).detail || 'Android text-to-speech failed');
+        options.onEnd?.();
+      };
+      window.addEventListener('ayra-tts-start', onNativeStart);
+      window.addEventListener('ayra-tts-end', onNativeEnd);
+      window.addEventListener('ayra-tts-error', onNativeError);
+      try {
+        if (nativeBridge.speakText(cleanText, options.language || 'en')) return;
+      } catch {
+        cleanup();
+      }
+    }
+
+    // Browser fallback for browsers that implement SpeechSynthesis.
     this.speakBrowserSynthesis(cleanText, options);
   }
 
@@ -290,6 +324,9 @@ export class VoiceService {
         this.activeAudio.currentTime = 0;
       } catch {}
       this.activeAudio = null;
+    }
+    if (typeof window !== 'undefined' && (window as any).AyraNativeBridge?.stopSpeaking) {
+      try { (window as any).AyraNativeBridge.stopSpeaking(); } catch {}
     }
     if (this.synth) {
       try {
