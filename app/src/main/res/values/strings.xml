@@ -1,3 +1,3 @@
 <resources>
-    <string name="app_name">AYRA AI</string>
+    <string name="app_name">AYRA AI</string>\n    <string name="ayra_accessibility_description">Allows AYRA to perform user-requested navigation and text-button taps in supported apps. It does not collect passwords or type personal data automatically.</string>
 </resources>
