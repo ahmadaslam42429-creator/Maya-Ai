@@ -11,6 +11,7 @@ import { EmotionType, LanguageCode, ChatMessage } from '../../types/assistant';
 import { RealisticMayaAvatar } from '../Avatar/RealisticMayaAvatar';
 import { VoiceWaveform } from './VoiceWaveform';
 import { VoiceService } from '../../services/voiceService';
+import { sendGeminiMessage } from '../../services/geminiClient';
 import { 
   X, 
   Mic, 
@@ -171,21 +172,15 @@ export const LiveVoiceSessionModal: React.FC<LiveVoiceSessionModalProps> = ({
     setEmotion('thinking');
 
     try {
-      const res = await fetch('https://ayra-ai-new-app.hatchable.site/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: speechText,
-          history: conversationHistoryRef.current.slice(-8).map((item) => ({
-            role: item.role === 'model' ? 'assistant' : 'user',
-            text: item.content,
-          })),
-          language: activeLanguage,
-        }),
-      });
+      const data = await sendGeminiMessage(
+        speechText,
+        conversationHistoryRef.current.slice(-8).map((item) => ({
+          role: item.role === 'model' ? 'assistant' : 'user',
+          text: item.content,
+        })),
+        activeLanguage
+      );
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `AYRA live chat returned ${res.status}`);
       const reply = data.reply || "Systems operational. I'm listening.";
       const detectedEmotion = (data.emotion as EmotionType) || 'happy';
 
