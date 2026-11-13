@@ -286,17 +286,18 @@ export default function App() {
     setEmotion('thinking');
 
     try {
-      const res = await fetch('/api/gemini/chat', {
+      const res = await fetch('https://ayra-ai-new-app.hatchable.site/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: text.trim(),
-          history: messages.slice(-8),
-          userLanguage: voiceSettings.language,
+          history: messages.slice(-8).map((item) => ({ role: item.role, text: item.text })),
+          language: voiceSettings.language,
         }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `AYRA chat service returned ${res.status}`);
       const replyText = data.reply || "Transmission acknowledged. All subsystems operational.";
       const detectedEmotion = (data.emotion as EmotionType) || 'happy';
       const detectedLang = data.detectedLanguage || voiceSettings.language;
