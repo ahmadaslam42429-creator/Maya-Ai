@@ -20,6 +20,9 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
+import java.util.Locale
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -35,6 +38,66 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var assetLoader: WebViewAssetLoader
     @Volatile private var pendingWakeWordStart = false
+    private lateinit var textToSpeech: TextToSpeech
+    @Volatile private var ttsReady = false
+    @Volatile private var pendingTtsText: String? = null
+    @Volatile private var pendingTtsLanguage: String = "en"
+
+    private fun initializeNativeTts() {
+        textToSpeech = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                ttsReady = true
+                textToSpeech.setSpeechRate(1.02f)
+                textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                    override fun onStart(utteranceId: String?) {
+                        runOnUiThread { dispatchTtsEvent("ayra-tts-start") }
+                    }
+                    override fun onDone(utteranceId: String?) {
+                        runOnUiThread { dispatchTtsEvent("ayra-tts-end") }
+                    }
+                    @Deprecated("Deprecated in Java")
+                    override fun onError(utteranceId: String?) {
+                        runOnUiThread { dispatchTtsEvent("ayra-tts-error") }
+                    }
+                    override fun onError(utteranceId: String?, errorCode: Int) {
+                        runOnUiThread { dispatchTtsEvent("ayra-tts-error") }
+                    }
+                })
+                pendingTtsText?.let { queued ->
+                    val queuedLanguage = pendingTtsLanguage
+                    pendingTtsText = null
+                    speakNativeText(queued, queuedLanguage)
+                }
+            } else {
+                Log.e("AYRA_TTS", "Android TextToSpeech initialization failed: $status")
+            }
+        }
+    }
+
+    private fun speakNativeText(text: String, language: String): Boolean {
+        if (!ttsReady) {
+            pendingTtsText = text
+            pendingTtsLanguage = language
+            return true
+        }
+        val locale = when (language.lowercase()) {
+            "ur", "ur-pk" -> Locale("ur", "PK")
+            "hi", "hi-in" -> Locale("hi", "IN")
+            else -> Locale.US
+        }
+        val availability = textToSpeech.isLanguageAvailable(locale)
+        textToSpeech.language = if (availability >= TextToSpeech.LANG_AVAILABLE) locale else Locale.getDefault()
+        val result = textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "AYRA-${System.currentTimeMillis()}")
+        if (result == TextToSpeech.ERROR) {
+            dispatchTtsEvent("ayra-tts-error")
+            return false
+        }
+        return true
+    }
+
+    private fun dispatchTtsEvent(name: String) {
+        if (::webView.isInitialized) webView.evaluateJavascript("window.dispatchEvent(new Event('$name'));", null)
+    }
 
     // Multiple permissions launcher for Audio, Calls, Notifications
     private val requestPermissionsLauncher = registerForActivityResult(
@@ -77,6 +140,7 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         checkAppPermissions()
+        initializeNativeTts()
         setupWebView()
 
         // Handle Back button navigation
@@ -276,6 +340,22 @@ class MainActivity : AppCompatActivity() {
      */
     inner class AndroidBridge(private val context: Context) {
         @JavascriptInterface
+        fun speakText(text: String, language: String): Boolean {
+            if (text.isBlank()) return false
+            runOnUiThread { speakNativeText(text, language) }
+            return true
+        }
+
+        @JavascriptInterface
+        fun stopSpeaking(): Boolean {
+            runOnUiThread {
+                if (::textToSpeech.isInitialized) textToSpeech.stop()
+                dispatchTtsEvent("ayra-tts-end")
+            }
+            return true
+        }
+
+        @JavascriptInterface
         fun launchApp(packageName: String): Boolean {
             return try {
                 val intent = packageManager.getLaunchIntentForPackage(packageName)
@@ -433,6 +513,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        if (::textToSpeech.isInitialized) {
+            textToSpeech.stop()
+            textToSpeech.shutdown()
+        }
         webView.destroy()
         super.onDestroy()
     }
