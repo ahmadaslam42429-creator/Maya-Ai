@@ -6,7 +6,7 @@
 [![Android SDK](https://img.shields.io/badge/Android-SDK_34-orange.svg)](https://developer.android.com)
 [![Gemini AI](https://img.shields.io/badge/Powered%20By-Google%20Gemini-4285F4.svg)](https://ai.google.dev/)
 
-**AYRA AI** (آئرا AI) is a next-generation Android AI personal assistant inspired by JARVIS. It features a photorealistic 3D rigged female avatar with dynamic phoneme lip-sync, real-time continuous duplex live voice conversations, an in-app neural web browser, optical camera OCR vision, multi-session conversation vaults, and seamless native Android device intent automation (phone calls, alarms, SMS, system settings, and app launching).
+**AYRA AI** (آئرا AI) is a next-generation Android AI personal assistant inspired by JARVIS. It features a Three.js holographic avatar stage with the supplied Hatsune Miku GLB model (static T-pose; skeletal animation requires a rigged asset), real-time continuous duplex live voice conversations, an in-app neural web browser, optical camera OCR vision, multi-session conversation vaults, and seamless native Android device intent automation (phone calls, alarms, SMS, system settings, and app launching).
 
 ---
 
@@ -33,8 +33,8 @@
 
 ### 3. 👤 Photorealistic 3D Rigged Female Avatar
 - **Character Model**: Full-body futuristic female character with technology hoodie, headset, and smartwatch.
-- **Skeletal Pose Rigging**: Dynamic postures including `SIT`, `STAND`, `WAVE`, `TALK`, `THINK`, and `IDLE`.
-- **Phonetic Viseme Lip-Sync**: Realistic mouth shape morphing (`A`, `E`, `O`, `U`, `M`, `F`) synchronized with audio.
+- **Imported GLB Hologram**: Bundles the user-supplied Hatsune Miku GLB into the Android app and renders it in the cyan hologram stage. The supplied model is a static T-pose with no skeleton or morph targets; whole-model idle motion works, but skeletal gestures and model lip-sync require a rigged model.
+- **Voice Output**: Speech synthesis and voice controls remain available. True mouth-shape lip-sync on the imported GLB requires facial morph targets or a compatible rig.
 - **Natural Biological Behaviors**: Poisson-distribution eyelid blinking, pupil saccades, and pointer gaze tracking.
 - **Audio-Reactive Glow**: Real-time canvas waveform and glowing hologram lighting.
 
