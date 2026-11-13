@@ -4,6 +4,7 @@ import { Settings, Sliders, Volume2, Mic, Smartphone, Download, Copy, Check, Fil
 import { VoiceService } from '../../services/voiceService';
 import { AndroidIntentService } from '../../services/androidIntents';
 import { RealisticMayaAvatar } from '../Avatar/RealisticMayaAvatar';
+import { testGeminiApiKey } from '../../services/geminiClient';
 
 interface SettingsApkStudioProps {
   settings: VoiceSettings;
@@ -28,6 +29,26 @@ export const SettingsApkStudio: React.FC<SettingsApkStudioProps> = ({
   const [selectedPose, setSelectedPose] = useState<AvatarPose>(avatarPose);
   const [lipSyncEnabled, setLipSyncEnabled] = useState(true);
   const [avatarQuality, setAvatarQuality] = useState<'ultra' | 'high' | 'balanced'>('ultra');
+  const [geminiKey, setGeminiKey] = useState(() => {
+    try { return localStorage.getItem('ayra_gemini_api_key') || ''; } catch { return ''; }
+  });
+  const [showGeminiKey, setShowGeminiKey] = useState(false);
+  const [geminiStatus, setGeminiStatus] = useState('');
+  const [testingGemini, setTestingGemini] = useState(false);
+  const saveGeminiKey = () => {
+    try {
+      if (geminiKey.trim()) localStorage.setItem('ayra_gemini_api_key', geminiKey.trim());
+      else localStorage.removeItem('ayra_gemini_api_key');
+      setGeminiStatus(geminiKey.trim() ? 'API key saved on this device.' : 'API key removed.');
+    } catch { setGeminiStatus('Could not save the key on this device.'); }
+  };
+  const checkGeminiKey = async () => {
+    if (!geminiKey.trim()) { setGeminiStatus('Enter your Gemini API key first.'); return; }
+    setTestingGemini(true); setGeminiStatus('Testing Gemini connection...');
+    try { await testGeminiApiKey(geminiKey); setGeminiStatus('Connection successful. Gemini is ready.'); }
+    catch (error:any) { setGeminiStatus(error?.message || 'Connection failed.'); }
+    finally { setTestingGemini(false); }
+  };
 
   useEffect(() => {
     const loadVoices = () => {
@@ -210,6 +231,24 @@ class MainActivity : BridgeActivity(), TextToSpeech.OnInitListener {
             <span className="text-[10px] font-hud text-cyan-400 uppercase tracking-widest">Configuration & Android Deployment</span>
             <h3 className="text-base font-bold font-tech text-white">AYRA Settings & APK Studio</h3>
           </div>
+        </div>
+
+        <div className="mb-4 p-4 rounded-xl bg-[#050B1B] border border-cyan-500/30 space-y-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-cyan-300" />
+            <h4 className="text-sm font-bold text-white">Gemini API Key</h4>
+          </div>
+          <p className="text-[11px] text-slate-400">Add your own Google AI Studio key. It is stored locally on this device and is not embedded in the APK.</p>
+          <div className="flex gap-2">
+            <input value={geminiKey} onChange={(e) => setGeminiKey(e.target.value)} type={showGeminiKey ? 'text' : 'password'} autoComplete="off" placeholder="Paste Gemini API key" className="min-w-0 flex-1 rounded-lg bg-black/50 border border-cyan-500/30 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400" />
+            <button onClick={() => setShowGeminiKey(v => !v)} className="px-3 rounded-lg border border-white/10 text-slate-300 text-xs">{showGeminiKey ? 'Hide' : 'Show'}</button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={saveGeminiKey} className="px-3 py-2 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs">Save Key</button>
+            <button onClick={checkGeminiKey} disabled={testingGemini} className="px-3 py-2 rounded-lg border border-cyan-500/40 text-cyan-200 text-xs disabled:opacity-50">{testingGemini ? 'Testing...' : 'Test Connection'}</button>
+            <button onClick={() => { setGeminiKey(''); try { localStorage.removeItem('ayra_gemini_api_key'); } catch {} setGeminiStatus('API key removed.'); }} className="px-3 py-2 rounded-lg border border-red-500/30 text-red-300 text-xs">Delete Key</button>
+          </div>
+          {geminiStatus && <p className="text-[11px] text-cyan-200 break-words">{geminiStatus}</p>}
         </div>
 
         {/* Tab Switcher */}
