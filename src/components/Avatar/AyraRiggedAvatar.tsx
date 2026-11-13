@@ -350,9 +350,9 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
           const materials = Array.isArray(node.material) ? node.material : [node.material];
           const hologramMaterials = materials.map((source) => {
             const material = source.clone();
-            if ('color' in material && material.color) material.color.lerp(new THREE.Color(0x78dfff), 0.28);
-            if ('emissive' in material && material.emissive) {
-              material.emissive = new THREE.Color(0x087ca8);
+            if (material instanceof THREE.MeshStandardMaterial) {
+              material.color.lerp(new THREE.Color(0x78dfff), 0.28);
+              material.emissive.set(0x087ca8);
               material.emissiveIntensity = 0.42;
             }
             material.transparent = true;
