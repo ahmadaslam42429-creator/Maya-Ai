@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var assetLoader: WebViewAssetLoader
+    @Volatile private var pendingWakeWordStart = false
 
     // Multiple permissions launcher for Audio, Calls, Notifications
     private val requestPermissionsLauncher = registerForActivityResult(
@@ -42,6 +43,12 @@ class MainActivity : AppCompatActivity() {
         val micGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
         if (micGranted) {
             Toast.makeText(this, "AYRA Voice Systems Ready", Toast.LENGTH_SHORT).show()
+            if (pendingWakeWordStart) {
+                pendingWakeWordStart = false
+                startNativeWakeWordService()
+            }
+        } else {
+            pendingWakeWordStart = false
         }
     }
 
@@ -85,6 +92,28 @@ class MainActivity : AppCompatActivity() {
 
         // Load AYRA AI Application
         loadAssistantApp()
+    }
+
+    private fun startNativeWakeWordService(): Boolean {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) return false
+        if (!android.speech.SpeechRecognizer.isRecognitionAvailable(this)) {
+            Log.e("AYRA_AI", "No Android speech recognition provider is installed")
+            return false
+        }
+        return try {
+            val intent = Intent(this, AyraFloatingOverlayService::class.java).apply {
+                action = AyraFloatingOverlayService.ACTION_START_WAKE_WORD
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(this, intent)
+            } else {
+                startService(intent)
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("AYRA_AI", "Could not start Hey AYRA listener: ${e.message}", e)
+            false
+        }
     }
 
     private fun checkAppPermissions() {
@@ -368,27 +397,11 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface
         fun startWakeWordListening(): Boolean {
             if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                pendingWakeWordStart = true
                 runOnUiThread { checkAppPermissions() }
                 return false
             }
-            if (!android.speech.SpeechRecognizer.isRecognitionAvailable(this@MainActivity)) {
-                Log.e("AYRA_AI", "No Android speech recognition provider is installed")
-                return false
-            }
-            return try {
-                val intent = Intent(this@MainActivity, AyraFloatingOverlayService::class.java).apply {
-                    action = AyraFloatingOverlayService.ACTION_START_WAKE_WORD
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ContextCompat.startForegroundService(this@MainActivity, intent)
-                } else {
-                    startService(intent)
-                }
-                true
-            } catch (e: Exception) {
-                Log.e("AYRA_AI", "Could not start Hey AYRA listener: ${e.message}", e)
-                false
-            }
+            return startNativeWakeWordService()
         }
 
         @JavascriptInterface
