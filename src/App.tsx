@@ -75,6 +75,13 @@ export default function App() {
   // Real-Time Duplex Live Voice Mode state
   const [isLiveVoiceOpen, setIsLiveVoiceOpen] = useState(false);
 
+  // Open live two-way chat when the native Hey AYRA listener detects its wake phrase.
+  useEffect(() => {
+    const handleNativeWake = () => setIsLiveVoiceOpen(true);
+    window.addEventListener('ayra-trigger-live-voice', handleNativeWake);
+    return () => window.removeEventListener('ayra-trigger-live-voice', handleNativeWake);
+  }, []);
+
   // 3D Avatar Pose State (Persisted)
   const [avatarPose, setAvatarPose] = useState<AvatarPose>(() => {
     try {
