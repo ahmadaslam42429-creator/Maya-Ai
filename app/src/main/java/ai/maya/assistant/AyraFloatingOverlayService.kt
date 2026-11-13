@@ -6,6 +6,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Intent
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -36,6 +40,12 @@ class AyraFloatingOverlayService : Service() {
         const val NOTIFICATION_ID = 4291
         const val ACTION_STOP_SERVICE = "ai.maya.assistant.ACTION_STOP_FLOATING"
         const val ACTION_EXPAND_CHAT = "ai.maya.assistant.ACTION_EXPAND_CHAT"
+        const val ACTION_START_WAKE_WORD = "ai.maya.assistant.ACTION_START_WAKE_WORD"
+        const val ACTION_STOP_WAKE_WORD = "ai.maya.assistant.ACTION_STOP_WAKE_WORD"
+
+        @Volatile
+        var isWakeWordListening: Boolean = false
+            private set
 
         @Volatile
         var isServiceRunning: Boolean = false
@@ -61,6 +71,8 @@ class AyraFloatingOverlayService : Service() {
     private var windowManager: WindowManager? = null
     private var floatingBubbleView: View? = null
     private var floatingParams: WindowManager.LayoutParams? = null
+    private var speechRecognizer: SpeechRecognizer? = null
+    private var wakeWordTriggered = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -73,11 +85,114 @@ class AyraFloatingOverlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_STOP_WAKE_WORD) {
+            stopWakeWordRecognition()
+            if (floatingBubbleView == null) stopSelf()
+            return START_NOT_STICKY
+        }
+        if (intent?.action == ACTION_START_WAKE_WORD) {
+            startWakeWordRecognition()
+            return START_STICKY
+        }
         if (intent?.action == ACTION_STOP_SERVICE) {
             stopSelf()
             return START_NOT_STICKY
         }
         return START_STICKY
+    }
+
+    private fun startWakeWordRecognition() {
+        if (isWakeWordListening) return
+        if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            Log.w("AYRA_WAKE", "Microphone permission is not granted")
+            stopSelf()
+            return
+        }
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            Log.e("AYRA_WAKE", "Android speech recognition service is unavailable")
+            stopSelf()
+            return
+        }
+        try {
+            speechRecognizer?.destroy()
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this).also { recognizer ->
+                recognizer.setRecognitionListener(object : RecognitionListener {
+                    override fun onReadyForSpeech(params: Bundle?) { isWakeWordListening = true }
+                    override fun onBeginningOfSpeech() {}
+                    override fun onRmsChanged(rmsdB: Float) {}
+                    override fun onBufferReceived(buffer: ByteArray?) {}
+                    override fun onEndOfSpeech() {}
+                    override fun onError(error: Int) {
+                        if (isWakeWordListening && !wakeWordTriggered) {
+                            android.os.Handler(mainLooper).postDelayed({ beginWakeWordListening() }, 1200)
+                        }
+                    }
+                    override fun onResults(results: Bundle?) {
+                        inspectWakePhrase(results)
+                        if (isWakeWordListening && !wakeWordTriggered) {
+                            android.os.Handler(mainLooper).postDelayed({ beginWakeWordListening() }, 350)
+                        }
+                    }
+                    override fun onPartialResults(partialResults: Bundle?) {
+                        inspectWakePhrase(partialResults)
+                    }
+                    override fun onEvent(eventType: Int, params: Bundle?) {}
+                })
+            }
+            wakeWordTriggered = false
+            beginWakeWordListening()
+        } catch (e: Exception) {
+            Log.e("AYRA_WAKE", "Unable to start speech recognition: ${e.message}", e)
+            stopWakeWordRecognition()
+        }
+    }
+
+    private fun beginWakeWordListening() {
+        if (!isWakeWordListening && speechRecognizer == null) return
+        if (wakeWordTriggered) return
+        try {
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+                putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, false)
+            }
+            speechRecognizer?.startListening(intent)
+            isWakeWordListening = true
+        } catch (e: Exception) {
+            Log.e("AYRA_WAKE", "Speech recognition restart failed: ${e.message}")
+            stopWakeWordRecognition()
+        }
+    }
+
+    private fun inspectWakePhrase(bundle: Bundle?) {
+        if (wakeWordTriggered) return
+        val matches = bundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) ?: return
+        val heard = matches.joinToString(" ").lowercase()
+            .replace(Regex("[^a-z0-9 ]"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+        val wakePhrases = listOf("hey ayra", "hey yara", "hey ira", "ayra")
+        if (wakePhrases.any { phrase -> heard.contains(phrase) }) {
+            wakeWordTriggered = true
+            stopWakeWordRecognition()
+            val launch = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                putExtra("trigger_live_voice", true)
+            }
+            try {
+                startActivity(launch)
+            } catch (e: Exception) {
+                Log.e("AYRA_WAKE", "Could not open AYRA after wake phrase: ${e.message}")
+            }
+        }
+    }
+
+    private fun stopWakeWordRecognition() {
+        isWakeWordListening = false
+        try { speechRecognizer?.cancel() } catch (_: Exception) {}
+        try { speechRecognizer?.destroy() } catch (_: Exception) {}
+        speechRecognizer = null
     }
 
     private fun createNotificationChannel() {
@@ -262,6 +377,7 @@ class AyraFloatingOverlayService : Service() {
 
     override fun onDestroy() {
         isServiceRunning = false
+        stopWakeWordRecognition()
         try {
             if (floatingBubbleView != null) {
                 windowManager?.removeView(floatingBubbleView)
