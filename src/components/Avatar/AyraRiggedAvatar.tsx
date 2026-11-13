@@ -340,7 +340,7 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
         const center = bounds.getCenter(new THREE.Vector3());
         const height = Math.max(bounds.max.y - bounds.min.y, 0.001);
         importedModel.position.sub(center);
-        importedModel.scale.setScalar(1.72 / height);
+        importedModel.scale.multiplyScalar(1.72 / height);
         importedModel.traverse((node) => {
           if (!(node instanceof THREE.Mesh)) return;
           node.castShadow = false;
