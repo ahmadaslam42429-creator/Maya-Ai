@@ -72,6 +72,19 @@
             </intent-filter>
         </activity>
         
+        <service
+            android:name=".AyraAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true"
+            android:label="AYRA AI app interaction">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/ayra_accessibility_service" />
+        </service>
+
         <!-- Background Live Voice & Floating Overlay Assistant Service -->
         <service
             android:name=".AyraFloatingOverlayService"
