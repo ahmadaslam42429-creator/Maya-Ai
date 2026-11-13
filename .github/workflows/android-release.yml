@@ -220,8 +220,8 @@ jobs:
             ### 🌟 Key Features in this Build:
             - 🫧 **Floating Chat Head & Background Live Mode**: Continuous two-way conversational live chat and voice active even when other apps (WhatsApp, YouTube, Google Maps) are open and AYRA is minimized.
             - ⚡ **Real-Time Live Voice & Duplex Mode**: Automatic turn-detection, barge-in speech interruption, live scrolling transcript, and Kore female voice.
-            - 👤 **Extracted Transparent 3D Rigged Avatar**: Isolated character with zero background clutter, natural breathing, eye blinking, pupil gaze tracking, and real skeletal postures (`SIT`, `STAND`, `WAVE`, `THINK`, `TALK`).
-            - 👄 **Phonetic Lip-Sync System**: Real viseme mouth morphing (`A`, `E`, `O`, `U`, `M`, `F`) dynamically synchronized with spoken audio.
+            - 👤 **Imported Hatsune Miku GLB Hologram**: The user-supplied 3D model is bundled into the APK and rendered in the cyan hologram stage. This asset is a static T-pose without a skeleton or facial morph targets; skeletal gestures and true model lip-sync require a rigged asset.
+            - 🔊 **Voice Output**: Assistant speech synthesis remains enabled; true phonetic mouth animation on the imported GLB requires facial morph targets or a compatible rig.
             - 🧠 **JARVIS-Inspired Intelligence Core**: Powered by Google Gemini AI with multi-turn conversation and persistent memory vault.
             - 🌐 **In-App Neural Web Browser**: Multi-tab browsing with AI page reader & summarizer.
             - 👁️ **Optical Camera Vision & OCR**: Live camera frame capture and gallery image analysis with OCR text extraction.
