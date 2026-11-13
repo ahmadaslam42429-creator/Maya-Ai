@@ -10,6 +10,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EmotionType, AvatarPose, AvatarPosition, AvatarSize, AvatarFraming } from '../../types/assistant';
 import {
   Volume2,
@@ -324,6 +325,54 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
     const charGroup = new THREE.Group();
     avatarGroup.add(charGroup);
 
+    // Load the user-supplied Hatsune Miku GLB as the actual 3D hologram.
+    // The supplied file is a static T-pose (no skeleton or morph targets),
+    // so whole-model idle motion is supported; skeletal gestures/lip-sync are not.
+    let importedModelLoaded = false;
+    let importedModel: THREE.Group | null = null;
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load(
+      './assets/ayra/hatsune-miku.glb',
+      (gltf) => {
+        importedModelLoaded = true;
+        importedModel = gltf.scene;
+        const bounds = new THREE.Box3().setFromObject(importedModel);
+        const center = bounds.getCenter(new THREE.Vector3());
+        const height = Math.max(bounds.max.y - bounds.min.y, 0.001);
+        importedModel.position.sub(center);
+        importedModel.scale.setScalar(1.72 / height);
+        importedModel.traverse((node) => {
+          if (!(node instanceof THREE.Mesh)) return;
+          node.castShadow = false;
+          node.receiveShadow = false;
+          const materials = Array.isArray(node.material) ? node.material : [node.material];
+          const hologramMaterials = materials.map((source) => {
+            const material = source.clone();
+            if ('color' in material && material.color) material.color.lerp(new THREE.Color(0x78dfff), 0.28);
+            if ('emissive' in material && material.emissive) {
+              material.emissive = new THREE.Color(0x087ca8);
+              material.emissiveIntensity = 0.42;
+            }
+            material.transparent = true;
+            material.opacity = 0.94;
+            material.depthWrite = true;
+            return material;
+          });
+          node.material = Array.isArray(node.material) ? hologramMaterials : hologramMaterials[0];
+        });
+        if (seatedMesh) { charGroup.remove(seatedMesh); seatedMesh.geometry.dispose(); (seatedMesh.material as THREE.Material).dispose(); seatedMesh = null; }
+        if (standingMesh) { charGroup.remove(standingMesh); standingMesh.geometry.dispose(); (standingMesh.material as THREE.Material).dispose(); standingMesh = null; }
+        if (wavingMesh) { charGroup.remove(wavingMesh); wavingMesh.geometry.dispose(); (wavingMesh.material as THREE.Material).dispose(); wavingMesh = null; }
+        charGroup.add(importedModel);
+        mouthMesh.visible = false;
+        eyeMesh.visible = false;
+        leftHp.visible = false;
+        rightHp.visible = false;
+      },
+      undefined,
+      (error) => console.error('AYRA GLB avatar could not load; using fallback avatar artwork.', error)
+    );
+
     const textureLoader = new THREE.TextureLoader();
 
     // Clean Extracted Character Assets (no room/mug/laptop background)
@@ -339,6 +388,7 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
     textureLoader.load(
       seatedPath,
       (tex) => {
+        if (importedModelLoaded) { tex.dispose(); return; }
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
         const geo = new THREE.PlaneGeometry(2.1, 2.1, 16, 16);
@@ -367,6 +417,7 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
     textureLoader.load(
       standingPath,
       (tex) => {
+        if (importedModelLoaded) { tex.dispose(); return; }
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
         const geo = new THREE.PlaneGeometry(1.65, 2.45, 16, 16);
@@ -397,6 +448,7 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
     textureLoader.load(
       wavingPath,
       (tex) => {
+        if (importedModelLoaded) { tex.dispose(); return; }
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
         const geo = new THREE.PlaneGeometry(2.1, 2.1, 16, 16);
