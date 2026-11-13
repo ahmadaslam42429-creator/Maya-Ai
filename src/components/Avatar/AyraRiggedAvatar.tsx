@@ -60,6 +60,7 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
   const [internalSize, setInternalSize] = useState<AvatarSize>(size);
   const [internalPosition, setInternalPosition] = useState<AvatarPosition>(position);
   const [activeViseme, setActiveViseme] = useState<string>('REST');
+  const [usesImportedModel, setUsesImportedModel] = useState(false);
 
   // Sync with prop changes
   useEffect(() => {
@@ -336,6 +337,7 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
       (gltf) => {
         importedModelLoaded = true;
         importedModel = gltf.scene;
+        setUsesImportedModel(true);
         const bounds = new THREE.Box3().setFromObject(importedModel);
         const center = bounds.getCenter(new THREE.Vector3());
         const height = Math.max(bounds.max.y - bounds.min.y, 0.001);
@@ -891,10 +893,16 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
 
         {/* Top-Right Status Badges */}
         <div className="absolute top-3 right-3 flex items-center gap-1.5 z-20">
-          {isSpeaking && (
+          {isSpeaking && !usesImportedModel && (
             <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-400 text-cyan-300 text-[10px] font-tech font-bold shadow-lg animate-pulse">
               <Volume2 className="w-3 h-3 text-cyan-400" />
               <span>VISEME: {activeViseme}</span>
+            </span>
+          )}
+
+          {usesImportedModel && (
+            <span className="px-2.5 py-1 rounded-full bg-amber-950/80 border border-amber-400/50 text-amber-200 text-[10px] font-tech font-bold shadow-md">
+              STATIC T-POSE • NO SKELETON
             </span>
           )}
 
@@ -925,10 +933,10 @@ export const AyraRiggedAvatar: React.FC<AyraRiggedAvatarProps> = ({
         <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 pointer-events-none">
           <div className="px-2.5 py-1 rounded-xl bg-[#061028]/90 border border-cyan-500/30 backdrop-blur-md shadow-lg">
             <div className="text-[11px] font-hud font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
-              AYRA AI • 3D RIG
+              AYRA AI • 3D HOLOGRAM
             </div>
             <div className="text-[9px] font-tech text-cyan-400/70 tracking-wider">
-              {currentPose.toUpperCase()} POSE • {internalFraming.toUpperCase()} VIEW
+              {usesImportedModel ? 'STATIC T-POSE • SKELETAL RIG NEEDED' : `${currentPose.toUpperCase()} POSE`} • {internalFraming.toUpperCase()} VIEW
             </div>
           </div>
         </div>
