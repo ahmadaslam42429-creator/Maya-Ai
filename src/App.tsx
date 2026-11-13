@@ -180,6 +180,21 @@ export default function App() {
     localStorage.setItem('ayra_voice_settings', JSON.stringify(voiceSettings));
   }, [voiceSettings]);
 
+  // Native Android hands-free wake listener. Browser/PWA builds safely skip this bridge.
+  useEffect(() => {
+    const nativeBridge = (window as any).AyraNativeBridge;
+    if (!nativeBridge) return;
+    if (voiceSettings.wakeWordEnabled) {
+      const started = nativeBridge.startWakeWordListening?.();
+      if (!started) console.warn('AYRA wake listener could not start. Check microphone permission and Android speech recognition availability.');
+    } else {
+      nativeBridge.stopWakeWordListening?.();
+    }
+    return () => {
+      if (!voiceSettings.wakeWordEnabled) nativeBridge.stopWakeWordListening?.();
+    };
+  }, [voiceSettings.wakeWordEnabled]);
+
   // System clock & battery telemetry tick
   useEffect(() => {
     const updateTime = () => {
