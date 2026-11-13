@@ -662,10 +662,10 @@ export default function App() {
                 setIsLiveVoiceOpen(true);
               }}
               className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-hud font-bold text-[10px] tracking-wider flex items-center gap-1.5 shadow-lg shadow-purple-900/40 ring-2 ring-purple-400/30 active:scale-95 transition-all"
-              title="Launch Continuous Live Voice Conversation"
+              title="Start real-time two-way AYRA live chat by voice"
             >
               <Radio className="w-3.5 h-3.5 animate-pulse text-white" />
-              <span className="hidden sm:inline">LIVE VOICE</span>
+              <span>LIVE CHAT</span>
             </button>
 
             <div className="hidden sm:flex flex-col text-right">
