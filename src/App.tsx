@@ -38,6 +38,7 @@ import { VisionSearchStudio } from './components/Vision/VisionSearchStudio';
 import { VoiceService } from './services/voiceService';
 import { AndroidIntentService } from './services/androidIntents';
 import { processLocalBrainMessage } from './services/localAiBrain';
+import { sendGeminiMessage } from './services/geminiClient';
 import { 
   Home,
   Mic, 
@@ -308,18 +309,12 @@ export default function App() {
     setEmotion('thinking');
 
     try {
-      const res = await fetch('https://ayra-ai-new-app.hatchable.site/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text.trim(),
-          history: messages.slice(-8).map((item) => ({ role: item.role, text: item.text })),
-          language: voiceSettings.language,
-        }),
-      });
+      const data = await sendGeminiMessage(
+        text.trim(),
+        messages.slice(-8).map((item) => ({ role: item.role, text: item.text })),
+        voiceSettings.language
+      );
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `AYRA chat service returned ${res.status}`);
       const replyText = data.reply || "Transmission acknowledged. All subsystems operational.";
       const detectedEmotion = (data.emotion as EmotionType) || 'happy';
       const detectedLang = data.detectedLanguage || voiceSettings.language;
