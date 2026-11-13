@@ -61,6 +61,7 @@ export const LiveVoiceSessionModal: React.FC<LiveVoiceSessionModalProps> = ({
   const isSessionActiveRef = useRef(false);
   const recognitionRef = useRef<any>(null);
   const isSpeakingRef = useRef(false);
+  const isProcessingRef = useRef(false);
   const conversationHistoryRef = useRef<Array<{ role: string; content: string }>>([]);
 
   useEffect(() => {
@@ -124,10 +125,10 @@ export const LiveVoiceSessionModal: React.FC<LiveVoiceSessionModalProps> = ({
             }
           },
           onError: (err: string) => {
-            if (isSessionActiveRef.current && !isSpeakingRef.current) {
+            if (isSessionActiveRef.current && !isSpeakingRef.current && !isProcessingRef.current) {
               // Gracefully restart listener if speech recognition ends
               setTimeout(() => {
-                if (isSessionActiveRef.current && !isSpeakingRef.current) {
+                if (isSessionActiveRef.current && !isSpeakingRef.current && !isProcessingRef.current) {
                   startContinuousListening();
                 }
               }, 600);
@@ -135,9 +136,9 @@ export const LiveVoiceSessionModal: React.FC<LiveVoiceSessionModalProps> = ({
           },
           onEnd: () => {
             // Automatically resume listening if session is active and not currently generating/speaking
-            if (isSessionActiveRef.current && !isSpeakingRef.current) {
+            if (isSessionActiveRef.current && !isSpeakingRef.current && !isProcessingRef.current) {
               setTimeout(() => {
-                if (isSessionActiveRef.current && !isSpeakingRef.current) {
+                if (isSessionActiveRef.current && !isSpeakingRef.current && !isProcessingRef.current) {
                   startContinuousListening();
                 }
               }, 400);
@@ -164,22 +165,27 @@ export const LiveVoiceSessionModal: React.FC<LiveVoiceSessionModalProps> = ({
     setSessionLogs((prev) => [...prev, { role: 'user', text: speechText, time: userTime }]);
 
     // Temporarily pause recognition while processing
+    isProcessingRef.current = true;
     stopContinuousListening();
     setLiveState('thinking');
     setEmotion('thinking');
 
     try {
-      const res = await fetch('/api/gemini/chat', {
+      const res = await fetch('https://ayra-ai-new-app.hatchable.site/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: speechText,
-          history: conversationHistoryRef.current.slice(-8),
-          userLanguage: activeLanguage,
+          history: conversationHistoryRef.current.slice(-8).map((item) => ({
+            role: item.role === 'model' ? 'assistant' : 'user',
+            text: item.content,
+          })),
+          language: activeLanguage,
         }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `AYRA live chat returned ${res.status}`);
       const reply = data.reply || "Systems operational. I'm listening.";
       const detectedEmotion = (data.emotion as EmotionType) || 'happy';
 
@@ -227,6 +233,7 @@ export const LiveVoiceSessionModal: React.FC<LiveVoiceSessionModalProps> = ({
       ]);
 
       // Speak out loud with female voice
+      isProcessingRef.current = false;
       setLiveState('speaking');
       VoiceService.speak(reply, {
         language: data.detectedLanguage || activeLanguage,
@@ -247,8 +254,10 @@ export const LiveVoiceSessionModal: React.FC<LiveVoiceSessionModalProps> = ({
           startContinuousListening();
         },
       });
-    } catch (err) {
+    } catch (err: any) {
       if (!isSessionActiveRef.current) return;
+      isProcessingRef.current = false;
+      setMicError(err?.message || 'AYRA could not answer. Check your connection and try again.');
       setLiveState('listening');
       startContinuousListening();
     }
