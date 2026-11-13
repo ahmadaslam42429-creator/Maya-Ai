@@ -364,6 +364,51 @@ class MainActivity : AppCompatActivity() {
         fun isFloatingOverlayRunning(): Boolean {
             return AyraFloatingOverlayService.isServiceRunning
         }
+
+        @JavascriptInterface
+        fun startWakeWordListening(): Boolean {
+            if (ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                runOnUiThread { checkAppPermissions() }
+                return false
+            }
+            if (!android.speech.SpeechRecognizer.isRecognitionAvailable(this@MainActivity)) {
+                Log.e("AYRA_AI", "No Android speech recognition provider is installed")
+                return false
+            }
+            return try {
+                val intent = Intent(this@MainActivity, AyraFloatingOverlayService::class.java).apply {
+                    action = AyraFloatingOverlayService.ACTION_START_WAKE_WORD
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ContextCompat.startForegroundService(this@MainActivity, intent)
+                } else {
+                    startService(intent)
+                }
+                true
+            } catch (e: Exception) {
+                Log.e("AYRA_AI", "Could not start Hey AYRA listener: ${e.message}", e)
+                false
+            }
+        }
+
+        @JavascriptInterface
+        fun stopWakeWordListening(): Boolean {
+            return try {
+                val intent = Intent(this@MainActivity, AyraFloatingOverlayService::class.java).apply {
+                    action = AyraFloatingOverlayService.ACTION_STOP_WAKE_WORD
+                }
+                startService(intent)
+                true
+            } catch (e: Exception) {
+                Log.e("AYRA_AI", "Could not stop Hey AYRA listener: ${e.message}", e)
+                false
+            }
+        }
+
+        @JavascriptInterface
+        fun isWakeWordListening(): Boolean {
+            return AyraFloatingOverlayService.isWakeWordListening
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
